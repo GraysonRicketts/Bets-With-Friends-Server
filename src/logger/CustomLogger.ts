@@ -4,6 +4,7 @@ import {
   ConsoleLogger,
   LoggerService,
 } from '@nestjs/common';
+import { Colorizer } from 'logform';
 import winston, { child, createLogger, format, transports } from 'winston';
 
 const levels = {
@@ -14,6 +15,9 @@ const levels = {
 };
 
 type LogContext = { [key: string]: string };
+const dateFormat = () => {
+  return new Date(Date.now()).toUTCString();
+};
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class CustomLogger extends ConsoleLogger {
@@ -31,7 +35,7 @@ export class CustomLogger extends ConsoleLogger {
         format.errors({ stack: true }),
         format.splat(),
         format.json(),
-      )
+      ),
     });
 
     if (context) {
@@ -39,14 +43,25 @@ export class CustomLogger extends ConsoleLogger {
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      this._logger.add(new transports.Console({
-        format: format.combine(
-          format.colorize(),
-          format.simple()
-        )
-      }));
+      const devFormat = format.printf((info) => {
+        let message = `${info.level} | ${dateFormat()} | ${info.message}`;
+        if (info.level === 'error' || info.level === 'fatal') {
+          message += `\n\t${format.prettyPrint(info.stack)}` 
+        }
+        
+        let colorizedMessage = format.colorize().colorize(
+          info.level,
+          message
+        );
+        return colorizedMessage;
+      });
+      this._logger.add(
+        new transports.Console({
+          format: devFormat,
+        }),
+      );
     } else {
-      this._logger.add(new transports.Console())
+      this._logger.add(new transports.Console());
     }
   }
 
@@ -80,15 +95,11 @@ export class CustomLogger extends ConsoleLogger {
 
   warn(message: any, context?: string, children?: LogContext): void {
     const _context = context || this._service;
-    this._logger
-      .child({ ...children, service: _context })
-      .warn(message);
+    this._logger.child({ ...children, service: _context }).warn(message);
   }
 
   log(message: any, context?: string, children?: LogContext): void {
     const _context = context || this._service;
-    this._logger
-      .child({ ...children, service: _context })
-      .info(message);
+    this._logger.child({ ...children, service: _context }).info(message);
   }
 }

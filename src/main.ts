@@ -6,8 +6,12 @@ import {
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { CustomLogger } from './logger/CustomLogger';
+import {} from 'dotenv/config';
+import { handleProcessorErrors } from './processError';
 
 async function bootstrap() {
+  handleProcessorErrors(new CustomLogger())
+
   // Create app
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -24,7 +28,7 @@ async function bootstrap() {
 
   // Implement custom logger for framework logging
   app.useLogger(new CustomLogger());
-  await app.listen(5000);
+  await app.listen(process.env.PORT);
 }
 bootstrap();
 
