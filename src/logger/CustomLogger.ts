@@ -5,6 +5,7 @@ import {
   LoggerService,
 } from '@nestjs/common';
 import { Colorizer } from 'logform';
+import { Logger, QueryRunner } from 'typeorm';
 import winston, { child, createLogger, format, transports } from 'winston';
 
 const levels = {
@@ -39,7 +40,7 @@ export class CustomLogger extends ConsoleLogger {
     });
 
     if (context) {
-      this._logger.defaultMeta({ service: context });
+      this._logger.defaultMeta = { service: context };
     }
 
     if (process.env.NODE_ENV !== 'production') {
@@ -98,6 +99,7 @@ export class CustomLogger extends ConsoleLogger {
     this._logger.child({ ...children, service: _context }).warn(message);
   }
 
+  
   log(message: any, context?: string, children?: LogContext): void {
     const _context = context || this._service;
     this._logger.child({ ...children, service: _context }).info(message);
