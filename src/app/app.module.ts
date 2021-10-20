@@ -1,23 +1,25 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { join, resolve } from 'path';
-import { CustomDbLogger } from 'src/logger/CustomDbLogger';
-import { CustomLogger } from 'src/logger/CustomLogger';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { LoggerModule } from 'src/logger/Logger.module';
+import { getConnectionOptions } from 'typeorm';
+import { AuditModule } from '../audit/audit.module';
+import { UsersModule } from '../modules/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-console.log(join(resolve(), 'src/migration'))
-console.log(resolve())
 @Module({
   imports: [
     LoggerModule,
-    // See .env for TypeORM configurations
-    TypeOrmModule.forRoot({
-      retryAttempts: 0,
-      useUTC: true,
-      logger: new CustomDbLogger(new CustomLogger('TypeOrm')),
+    // See .env for more TypeORM configurations
+    TypeOrmModule.forRootAsync({
+      useFactory: async () =>
+        Object.assign(await getConnectionOptions(), {
+          retryAttempts: 0,
+          useUTC: true,
+        } as Partial<TypeOrmModuleOptions>),
     }),
+    UsersModule,
+    AuditModule
   ],
   controllers: [AppController],
   providers: [AppService],

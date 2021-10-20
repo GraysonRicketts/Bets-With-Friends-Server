@@ -1,5 +1,5 @@
 CREATE USER server_user;
-ALTER USER server_user WITH PASSWORD ;
+ALTER USER server_user WITH PASSWORD;
 
 CREATE DATABASE bets_with_friends;
 GRANT CONNECT ON DATABASE bets_with_friends TO server_user;

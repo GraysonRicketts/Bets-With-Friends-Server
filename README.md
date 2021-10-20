@@ -3,7 +3,8 @@
 
 ## Installation
 
-TODO
+1. Postgres v14
+2. nvm
 
 ## Running the app
 

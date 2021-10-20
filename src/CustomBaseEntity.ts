@@ -1,7 +1,11 @@
-import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn, VersionColumn } from "typeorm";
+import { CreateDateColumn, DeleteDateColumn, PrimaryGeneratedColumn, UpdateDateColumn, VersionColumn } from "typeorm";
 import DateTime from 'luxon';
+import { uuid } from "./types";
 
 export abstract class CustomBaseEntity {
+    @PrimaryGeneratedColumn('uuid')
+    id: uuid;
+
     @CreateDateColumn({ type: 'timestamptz'})
     createdAt: DateTime;
 

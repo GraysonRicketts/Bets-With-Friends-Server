@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CustomLogger } from 'src/logger/CustomLogger';
 import { uuid } from 'src/types';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UsersService } from './users.service';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UsersService } from '../service/users.service';
 
 @Controller('users')
 export class UsersController {

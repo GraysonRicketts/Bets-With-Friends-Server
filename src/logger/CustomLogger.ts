@@ -2,11 +2,8 @@ import {
   Injectable,
   Scope,
   ConsoleLogger,
-  LoggerService,
 } from '@nestjs/common';
-import { Colorizer } from 'logform';
-import { Logger, QueryRunner } from 'typeorm';
-import winston, { child, createLogger, format, transports } from 'winston';
+import winston, { createLogger, format, transports } from 'winston';
 
 const levels = {
   fatal: 0,
@@ -45,9 +42,9 @@ export class CustomLogger extends ConsoleLogger {
 
     if (process.env.NODE_ENV !== 'production') {
       const devFormat = format.printf((info) => {
-        let message = `${info.level} | ${dateFormat()} | ${info.message}`;
+        let message = `${info.level} | ${dateFormat()} | ${info.service} | ${info.message}`;
         if (info.level === 'error' || info.level === 'fatal') {
-          message += `\n\t${format.prettyPrint(info.stack)}` 
+          message += `\n${info.stack}` 
         }
         
         let colorizedMessage = format.colorize().colorize(
