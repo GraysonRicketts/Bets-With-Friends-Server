@@ -3720,7 +3720,7 @@ micromatch@^4.0.0, micromatch@^4.0.4:
     braces "^3.0.1"
     picomatch "^2.2.3"
 
-middie@5.3.0:
+middie@5.3.0, middie@^5.3.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/middie/-/middie-5.3.0.tgz#6c871b3efecdb65f86c67a7787336d39b03d626d"
   integrity sha512-uq6Ob4dmmHeT6rJpBDWVwSxBzxzKlBvnrZdLSRJeuhHzljvZ6ccgLP/HaShgfiYrQvekRH0KUe/G1WTu/IrXsQ==

@@ -8,6 +8,7 @@ import { AppModule } from './app/app.module';
 import { CustomLogger } from './logger/CustomLogger';
 import {} from 'dotenv/config';
 import { handleProcessorErrors } from './processError';
+import middie from 'middie';
 
 async function bootstrap() {
   handleProcessorErrors(new CustomLogger())
@@ -15,7 +16,7 @@ async function bootstrap() {
   // Create app
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter(), 
   );
 
   // Swagger configuration
