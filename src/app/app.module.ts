@@ -4,7 +4,6 @@ import { LoggerModule } from 'src/logger/Logger.module';
 import { getConnectionOptions } from 'typeorm';
 import { AuditModule } from './audit/audit.module';
 import { UsersModule } from '../modules/users/users.module';
-import { TraceMiddleware } from './middleware/trace.middleware';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -25,10 +24,5 @@ import { AppService } from './app.service';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(TraceMiddleware)
-      .forRoutes({ path: '(.*)', method: RequestMethod.ALL });
-  }
+export class AppModule {
 }

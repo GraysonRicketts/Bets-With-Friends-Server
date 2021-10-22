@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Scope,
-  ConsoleLogger,
-} from '@nestjs/common';
+import { Injectable, Scope, ConsoleLogger } from '@nestjs/common';
 import winston, { createLogger, format, transports } from 'winston';
 
 const levels = {
@@ -12,7 +8,7 @@ const levels = {
   info: 3,
 };
 
-type LogContext = { [key: string]: string };
+type LogContext = { [key: string]: string | number };
 const dateFormat = () => {
   return new Date(Date.now()).toUTCString();
 };
@@ -42,15 +38,22 @@ export class CustomLogger extends ConsoleLogger {
 
     if (process.env.NODE_ENV !== 'production') {
       const devFormat = format.printf((info) => {
-        let message = `${info.level} | ${dateFormat()} | ${info.service} | ${info.message}`;
-        if (info.level === 'error' || info.level === 'fatal') {
-          message += `\n${info.stack}` 
-        }
+        const { level, service, message, ...context } = info;
+        delete context.timestamp;
         
-        let colorizedMessage = format.colorize().colorize(
-          info.level,
-          message
-        );
+        let logMessage = `${
+          info.level
+        } | ${dateFormat()} | ${service} | ${message} ${
+          Object.keys(context).length && `\n${JSON.stringify(context)}`
+        }`;
+        
+        if (info.level === 'error' || info.level === 'fatal') {
+          logMessage += `\n${info.stack}`;
+        }
+
+        let colorizedMessage = format
+          .colorize()
+          .colorize(info.level, logMessage);
         return colorizedMessage;
       });
       this._logger.add(
@@ -96,7 +99,6 @@ export class CustomLogger extends ConsoleLogger {
     this._logger.child({ ...children, service: _context }).warn(message);
   }
 
-  
   log(message: any, context?: string, children?: LogContext): void {
     const _context = context || this._service;
     this._logger.child({ ...children, service: _context }).info(message);
