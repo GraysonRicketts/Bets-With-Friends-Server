@@ -8,8 +8,10 @@ import { AppModule } from './app/app.module';
 import { CustomLogger } from './logger/CustomLogger';
 import {} from 'dotenv/config';
 import { handleProcessorErrors } from './processError';
-import middie from 'middie';
-import { LoggingInterceptor } from './app/logging.interceptor';
+import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
+import { AsyncLocalStorage } from 'async_hooks';
+
+export const ALS = new AsyncLocalStorage<TraceContext>();
 
 async function bootstrap() {
   handleProcessorErrors(new CustomLogger())
@@ -29,7 +31,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Implement custom logger for framework logging
-  const appLogger = new CustomLogger();
+  const appLogger = await app.resolve(CustomLogger)
+  appLogger.setContext('App')
   app.useLogger(appLogger);
   app.useGlobalInterceptors(new LoggingInterceptor(appLogger));
   await app.listen(process.env.PORT);

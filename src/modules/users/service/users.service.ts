@@ -17,6 +17,7 @@ export class UsersService {
   }
 
   findOne(uuid: uuid): Promise<User[]> {
+    this.logger.log('here')
     return this.usersRepository.find({ id: uuid});
   }
 

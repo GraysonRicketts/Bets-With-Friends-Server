@@ -1,5 +1,6 @@
 import { Injectable, Scope, ConsoleLogger } from '@nestjs/common';
 import winston, { createLogger, format, transports } from 'winston';
+import { ALS } from '../main';
 
 const levels = {
   fatal: 0,
@@ -48,12 +49,14 @@ export class CustomLogger extends ConsoleLogger {
         }`;
         
         if (info.level === 'error' || info.level === 'fatal') {
-          logMessage += `\n${info.stack}`;
+          logMessage += `\n${info.stack}`; 
         }
+
+        const colorLevel = info.level === 'fatal' ? 'error' : info.level;
 
         let colorizedMessage = format
           .colorize()
-          .colorize(info.level, logMessage);
+          .colorize(colorLevel, logMessage);
         return colorizedMessage;
       });
       this._logger.add(
@@ -100,7 +103,10 @@ export class CustomLogger extends ConsoleLogger {
   }
 
   log(message: any, context?: string, children?: LogContext): void {
-    const _context = context || this._service;
-    this._logger.child({ ...children, service: _context }).info(message);
+    const _context = context || this._service; 
+    
+    const traceContext = ALS.getStore();
+
+    this._logger.child({ ...children, service: _context, ...traceContext }).info(message);
   }
 }
