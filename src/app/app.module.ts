@@ -6,6 +6,7 @@ import { AuditModule } from './audit/audit.module';
 import { UsersModule } from '../modules/users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { GroupsModule } from '../modules/groups/groups.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AppService } from './app.service';
         } as Partial<TypeOrmModuleOptions>),
     }),
     UsersModule,
+    GroupsModule,
     AuditModule
   ],
   controllers: [AppController],
