@@ -15,8 +15,8 @@ export class Group extends CustomBaseEntity {
   @Column({name: 'owner_id', type: "uuid" })
   ownerId: uuid;
 
-  @OneToMany(() => UserGroup, userGroup => userGroup.group_id, {
-    cascade: ['insert', 'soft-remove']
+  @OneToMany(() => UserGroup, userGroup => userGroup.group, {
+    cascade: ['soft-remove']
   })
   userGroups: UserGroup[];
 }

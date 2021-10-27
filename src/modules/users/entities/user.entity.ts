@@ -8,6 +8,6 @@ export class User extends CustomBaseEntity {
   @Column()
   name: string;
 
-  @OneToMany(() => UserGroup, userGroup => userGroup.user_id,  { cascade: ['soft-remove']})
+  @OneToMany(() => UserGroup, userGroup => userGroup.user,  { cascade: ['soft-remove']})
   userGroups: UserGroup[];
 }

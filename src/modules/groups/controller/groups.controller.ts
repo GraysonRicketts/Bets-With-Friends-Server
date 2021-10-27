@@ -4,7 +4,7 @@ import { CreateGroupDto } from '../dto/create-group.dto';
 import { Group } from '../entities/group.entity';
 import { GroupsService } from './../service/groups.service';
 
-const currentUser = '3d6678cb-d119-4657-9fb1-7fa0dc245d6e'
+const currentUser = '349f8b57-5b83-459b-bbca-f269b50f4023'
 
 @Controller('groups')
 export class GroupsController {
