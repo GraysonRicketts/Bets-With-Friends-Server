@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String     @default(uuid()) @id
+  name  String
+  createdAt DateTime @map("created_at") @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @map("updated_at") @updatedAt @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+}
+
+model UserGroup {
+  id    String     @default(uuid()) @id
+  createdAt DateTime @map("created_at") @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+  deletedAt DateTime? @db.Timestamptz(3)
+}
+
+model Group {
+  name String
+  id    String     @default(uuid()) @id
+  createdAt DateTime @map("created_at") @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @map("updated_at") @updatedAt @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+}
+
+model Audit {
+  id    String     @default(uuid()) @id
+  createdAt DateTime @map("created_at") @default(now()) @db.Timestamptz(3)
+  before Json?
+  diff Json?
+}
+
+
