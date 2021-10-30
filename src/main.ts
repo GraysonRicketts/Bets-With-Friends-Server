@@ -11,7 +11,7 @@ import { handleProcessorErrors } from './processError';
 import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
-import { PORT } from './env.constants';
+import { PORT } from './env/env.constants';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 

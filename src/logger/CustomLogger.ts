@@ -1,6 +1,7 @@
 import { Injectable, Scope, ConsoleLogger } from '@nestjs/common';
 import winston, { createLogger, format, transports } from 'winston';
-import { NODE_ENV } from '../env.constants';
+import { NODE_ENV } from '../env/env.constants';
+import { isProd } from '../env/env.util';
 import { ALS } from '../main';
 
 const levels = {
@@ -38,7 +39,7 @@ export class CustomLogger extends ConsoleLogger {
       this._logger.defaultMeta = { service: context };
     }
 
-    if (NODE_ENV !== 'production') {
+    if (!isProd()) {
       const devFormat = format.printf((info) => {
         const { level, service, message, ...context } = info;
         delete context.timestamp;
