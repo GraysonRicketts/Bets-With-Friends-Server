@@ -18,7 +18,6 @@ const baseGroup = Prisma.validator<Prisma.GroupArgs>()({
     },
   },
 });
-type BaseGroupPayload = Prisma.GroupGetPayload<typeof baseGroup>;
 
 @Injectable()
 export class GroupService {
@@ -49,5 +48,17 @@ export class GroupService {
       where: { userGroup: { every: { user: { is: { id: userId } } } } },
       select: baseGroup.select,
     });
+  }
+  
+  findOne(id: string) {
+    return this.prisma.group.findUnique({
+      where: { id },
+      select: baseGroup.select
+    })
+  }
+
+  async addUserToGroup(userId: string, groupId: string, role = PrivelegeLevel.ADD_MEMBER) {
+    await this.prisma.userGroup.create({data: { userId, groupId, role }})
+    return this.findOne(groupId);
   }
 }
