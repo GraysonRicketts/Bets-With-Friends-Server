@@ -11,12 +11,13 @@ datasource db {
 }
 
 model User {
-  displayName String  @map("display_name")
-  email    String @unique @map("user_name")
-  
-  password    String?
+  displayName String @map("display_name")
+  email       String @unique @map("user_name")
+
+  password String?
 
   userGroup UserGroup[]
+  closedBet Bet[]
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -36,15 +37,22 @@ model UserGroup {
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt DateTime  @updatedAt  @map("updated_at") @db.Timestamptz(3)
-  deletedAt DateTime?  @map("deleted_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   @@map("user_group")
+}
+
+enum PrivelegeLevel {
+  OWNER
+  ADD_MEMBER
+  ADD_BET
 }
 
 model Group {
   name      String
   userGroup UserGroup[]
+  bet       Bet[]
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -63,8 +71,54 @@ model Audit {
   @@map("audit")
 }
 
-enum PrivelegeLevel {
-  OWNER
-  ADD_MEMBER
-  ADD_BET
+model Bet {
+  title      String
+  
+  category Category?
+  option  Option[]
+  
+  closedAt   DateTime?   @map("closed_at") @db.Timestamptz(3)
+  closedBy   User?       @relation(fields: [closedById], references: [id])
+  closedById String?     @map("closed_by_id")
+
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String @map("group_id")
+
+
+  id        String    @id @default(dbgenerated("gen_random_uuid ()"))
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  @@map("bet")
+}
+
+model Option {
+  name String
+
+  bet Bet @relation(fields: [betId], references: [id])
+  betId String @map("bet_id")
+
+  finalOption Boolean @default(false)
+
+  id        String    @id @default(dbgenerated("gen_random_uuid ()"))
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  @@map("option")
+}
+
+model Category {
+  name String
+
+  bet Bet @relation(fields: [betId], references:[id])
+  betId String @map("bet_id")
+
+  id        String    @id @default(dbgenerated("gen_random_uuid ()"))
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  @@map("category")
 }

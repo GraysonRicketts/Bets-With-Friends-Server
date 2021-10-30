@@ -6,12 +6,14 @@ import { AppService } from './app.service';
 import { GroupModule } from '../domains/group/group.module'
 import { LoggerModule } from '../logger/Logger.module';
 import { AuthModule } from '../auth/auth.module';
+import { BetModule } from '../domains/bet/bet.module';
 
 @Module({
   imports: [
     LoggerModule,
     UserModule,
     GroupModule,
+    BetModule,
     AuditModule,
     AuthModule
   ],
