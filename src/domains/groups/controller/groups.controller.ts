@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { uuid } from '../../../types';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { GroupsService } from '../service/groups.service';
 

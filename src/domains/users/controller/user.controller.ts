@@ -1,12 +1,11 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CustomLogger } from 'src/logger/CustomLogger';
-import { uuid } from 'src/types';
 import { CreateLocalUserDto } from '../dto/create-user.dto';
-import { UsersService } from '../service/users.service';
+import { UserService } from '../service/user.service';
 
 @Controller('users')
-export class UsersController {
-  constructor(private readonly usersService: UsersService, private readonly logger: CustomLogger) {
+export class UserController {
+  constructor(private readonly usersService: UserService, private readonly logger: CustomLogger) {
   }
 
   @Post()
@@ -15,8 +14,8 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: uuid) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string) {
+    return this.usersService.findUnique({ id });
   }
 }
 
