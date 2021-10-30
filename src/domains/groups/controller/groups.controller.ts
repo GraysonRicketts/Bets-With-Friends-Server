@@ -1,10 +1,9 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { uuid } from '../../../types';
 import { CreateGroupDto } from '../dto/create-group.dto';
-import { Group } from '../entities/group.entity';
-import { GroupsService } from './../service/groups.service';
+import { GroupsService } from '../service/groups.service';
 
-const currentUser = '349f8b57-5b83-459b-bbca-f269b50f4023'
+const currentUser = '0218e59e-a697-4399-b500-69cccbe1e7d7'
 
 @Controller('groups')
 export class GroupsController {
@@ -18,7 +17,7 @@ export class GroupsController {
   }
 
   @Get()
-  findAll(): Promise<Group[]> {
+  findAll(): Promise<any[]> {
     return this.groupsService.findAllForUser(currentUser)
   }
 

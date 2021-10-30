@@ -10,6 +10,7 @@ import {} from 'dotenv/config';
 import { handleProcessorErrors } from './processError';
 import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
+import { PrismaService } from './prisma/prisma.service';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 
@@ -35,6 +36,11 @@ async function bootstrap() {
   appLogger.setContext('App')
   app.useLogger(appLogger);
   app.useGlobalInterceptors(new LoggingInterceptor(appLogger));
+
+  // See https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks
+  const prismaService: PrismaService = app.get(PrismaService);
+  prismaService.enableShutdownHooks(app)
+
   await app.listen(process.env.PORT);
 }
 bootstrap();
