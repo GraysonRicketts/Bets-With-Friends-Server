@@ -1,16 +1,9 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { CustomLogger } from 'src/logger/CustomLogger';
-import { CreateLocalUserDto } from '../dto/create-user.dto';
+import { Controller, Get, Param } from '@nestjs/common';
 import { UserService } from '../service/user.service';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly usersService: UserService, private readonly logger: CustomLogger) {
-  }
-
-  @Post()
-  create(@Body() createBetDto: CreateLocalUserDto) {
-    return this.usersService.create(createBetDto);
+  constructor(private readonly usersService: UserService) {
   }
 
   @Get(':id')

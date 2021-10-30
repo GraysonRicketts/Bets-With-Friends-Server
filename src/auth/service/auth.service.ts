@@ -27,4 +27,9 @@ export class AuthService {
 
     return null;
   }
+
+  async createAccount(displayName, email, rawPassword) {
+    const password = rawPassword;
+    return this.userService.create({ displayName, email, password})
+  }
 }

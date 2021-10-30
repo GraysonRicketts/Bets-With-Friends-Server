@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreateLocalUserDto } from '../dto/create-user.dto';
+import { CreateLocalUserDto } from '../../../auth/dto/create-user.dto';
 
 const baseUser = Prisma.validator<Prisma.UserArgs>()({
   select: { email: true, displayName: true },

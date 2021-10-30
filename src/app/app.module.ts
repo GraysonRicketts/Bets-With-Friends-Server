@@ -5,13 +5,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GroupModule } from '../domains/group/group.module'
 import { LoggerModule } from '../logger/Logger.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     LoggerModule,
     UserModule,
     GroupModule,
-    AuditModule
+    AuditModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
