@@ -11,6 +11,7 @@ import { handleProcessorErrors } from './processError';
 import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
+import { PORT } from './env.constants';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 
@@ -41,7 +42,7 @@ async function bootstrap() {
   const prismaService: PrismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app)
 
-  await app.listen(process.env.PORT);
+  await app.listen(PORT);
 }
 bootstrap();
 

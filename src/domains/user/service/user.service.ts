@@ -5,10 +5,10 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateLocalUserDto } from '../../../auth/dto/create-user.dto';
 
 const baseUser = Prisma.validator<Prisma.UserArgs>()({
-  select: { email: true, displayName: true },
+  select: { id:true, email: true, displayName: true },
 });
 const passwordUser = Prisma.validator<Prisma.UserArgs>()({
-  select: { email: true, displayName: true, password: true },
+  select: { ...baseUser.select, password: true },
 });
 
 export type BaseUser = Prisma.UserGetPayload<typeof baseUser>;

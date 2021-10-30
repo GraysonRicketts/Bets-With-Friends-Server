@@ -1,13 +1,15 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
+  BaseUser,
   UserService,
   UserWithPassword,
 } from '../../domains/user/service/user.service';
 import { LoginDto } from './../dto/log-in.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService, private readonly jwtService: JwtService) {}
 
   async validateUser(loginDto: LoginDto) {
     const { email, password } = loginDto;
@@ -26,6 +28,14 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  async getJwtToken(user: BaseUser) {
+    const payload = { displayName: user.displayName, sub: user.id }
+
+    return {
+      accessToken: this.jwtService.sign(payload)
+    }
   }
 
   async createAccount(displayName, email, rawPassword) {
