@@ -31,13 +31,13 @@ export class UserService {
     this.logger.setContext(UserService.name);
   }
 
-  findUnique(
+  async findUnique(
     params: FindParams,
     opts?: FindOpts | undefined,
-  ): Promise<BaseUser | UserWithPassword | undefined> {
+  ): Promise<BaseUser | UserWithPassword | null> {
     const { email, id } = params;
     if (!email && !id) {
-      return undefined;
+      return Promise.resolve(null);
     }
 
     const where = email ? { email } : { id };

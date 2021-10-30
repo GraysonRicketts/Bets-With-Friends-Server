@@ -19,7 +19,7 @@ import { isProd } from '../env/env.util';
       
       return {
         secret: JWT_SECRET,
-        signOptions: JWT_EXPIRATION && { expiresIn: JWT_EXPIRATION },}
+        signOptions: { expiresIn: JWT_EXPIRATION }}
       }
   })],
   providers: [AuthService, LocalStrategy, JwtStrategy],
