@@ -1,23 +1,32 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Request,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../../../auth/guard/jwt-auth.guard';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { GroupService } from '../service/group.service';
 
-const currentUser = '0218e59e-a697-4399-b500-69cccbe1e7d7'
-
 @Controller('group')
 export class GroupController {
-  constructor(private readonly groupsService: GroupService) {
-  }
-    @Post()
-    create(@Body() createGroupDto: CreateGroupDto) {
-      const {name} = createGroupDto;
+  constructor(private readonly groupsService: GroupService) {}
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  create(@Body() createGroupDto: CreateGroupDto, @Request() req) {
+    const { name } = createGroupDto;
+    const currentUserId = req.user.id;
 
-      return this.groupsService.create(name, currentUser);
+    return this.groupsService.create(name, currentUserId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
-  findAll() {
-    return this.groupsService.findAllForUser(currentUser)
+  findAll(@Request() req) {
+    const currentUserId = req.user.id;
+    return this.groupsService.findAllForUser(currentUserId);
   }
 
   // @Get(':id')

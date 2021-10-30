@@ -21,9 +21,9 @@ export class CustomLogger extends ConsoleLogger {
   private _service: string;
 
   constructor(context?: string) {
-    super(context);
+    super(context || 'undefined');
 
-    this._service = context;
+    this._service = context || 'undefined';
     this._logger = createLogger({
       levels,
       format: format.combine(

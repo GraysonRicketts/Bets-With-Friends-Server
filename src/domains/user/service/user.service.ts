@@ -33,18 +33,16 @@ export class UserService {
 
   findUnique(
     params: FindParams,
-    opts?: FindOpts,
-  ): Promise<BaseUser | UserWithPassword> {
+    opts?: FindOpts | undefined,
+  ): Promise<BaseUser | UserWithPassword | undefined> {
     const { email, id } = params;
-    const { withPassword } = opts;
-
     if (!email && !id) {
-      return;
+      return undefined;
     }
 
     const where = email ? { email } : { id };
 
-    if (withPassword) {
+    if (opts?.withPassword) {
       return this.prisma.user.findUnique({
         ...passwordUser,
         where,
