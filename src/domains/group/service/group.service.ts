@@ -1,8 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Group } from '@prisma/client';
-import { PrivelegeLevel } from '@prisma/client'
+import { Prisma } from '@prisma/client';
+import { PrivelegeLevel } from '@prisma/client';
 import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { baseUser } from '../../user/service/user.service';
+
+const baseGroup = Prisma.validator<Prisma.GroupArgs>()({
+  select: {
+    id: true,
+    name: true,
+    userGroup: {
+      select: {
+        id: true,
+        role: true,
+        user: baseUser,
+      },
+    },
+  },
+});
+type BaseGroupPayload = Prisma.GroupGetPayload<typeof baseGroup>;
 
 @Injectable()
 export class GroupService {
@@ -13,37 +29,25 @@ export class GroupService {
     this.logger.setContext(GroupService.name);
   }
 
-  async create(name: string, ownerId: string): Promise<Group> {
+  async create(name: string, ownerId: string) {
     return this.prisma.group.create({
       data: {
         name,
         userGroup: {
           create: {
             userId: ownerId,
-            role: PrivelegeLevel.ADD_MEMBER
+            role: PrivelegeLevel.ADD_MEMBER,
           },
         },
       },
-      include: {
-        userGroup: {
-            include: {
-                user: true
-            }
-        }
-    }
+      select: baseGroup.select,
     });
   }
 
   findAllForUser(userId: string) {
-    return this.prisma.user.findMany(
-        {where: { id: userId},
-        include: {
-            userGroup: {
-                include: {
-                    group: true
-                }
-            }
-        }}
-    )
+    return this.prisma.group.findMany({
+      where: { userGroup: { every: { user: { is: { id: userId } } } } },
+      select: baseGroup.select,
+    });
   }
 }

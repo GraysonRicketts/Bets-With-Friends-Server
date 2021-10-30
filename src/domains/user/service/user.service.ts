@@ -4,15 +4,16 @@ import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateLocalUserDto } from '../../../auth/dto/create-user.dto';
 
-const baseUser = Prisma.validator<Prisma.UserArgs>()({
+export const baseUser = Prisma.validator<Prisma.UserArgs>()({
   select: { id:true, email: true, displayName: true },
+  
 });
 const passwordUser = Prisma.validator<Prisma.UserArgs>()({
   select: { ...baseUser.select, password: true },
 });
 
-export type BaseUser = Prisma.UserGetPayload<typeof baseUser>;
-export type UserWithPassword = Prisma.UserGetPayload<typeof passwordUser>;
+export type BaseUserPayload = Prisma.UserGetPayload<typeof baseUser>;
+export type UserWithPasswordPayload = Prisma.UserGetPayload<typeof passwordUser>;
 
 interface FindParams {
   email?: string;
@@ -34,7 +35,7 @@ export class UserService {
   async findUnique(
     params: FindParams,
     opts?: FindOpts | undefined,
-  ): Promise<BaseUser | UserWithPassword | null> {
+  ): Promise<BaseUserPayload | UserWithPasswordPayload | null> {
     const { email, id } = params;
     if (!email && !id) {
       return Promise.resolve(null);

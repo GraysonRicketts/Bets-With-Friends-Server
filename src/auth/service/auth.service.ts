@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
-  BaseUser,
+  BaseUserPayload,
   UserService,
-  UserWithPassword,
+  UserWithPasswordPayload,
 } from '../../domains/user/service/user.service';
 import { LoginDto } from './../dto/log-in.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -17,7 +17,7 @@ export class AuthService {
     const user = (await this.userService.findUnique(
       { email },
       { withPassword: true },
-    )) as UserWithPassword;
+    )) as UserWithPasswordPayload;
     if (!user.password) {
         throw new InternalServerErrorException('Should always have password');
     }
@@ -30,7 +30,7 @@ export class AuthService {
     return null;
   }
 
-  async getJwtToken(user: BaseUser) {
+  async getJwtToken(user: BaseUserPayload) {
     const payload = { displayName: user.displayName, sub: user.id }
 
     return {
