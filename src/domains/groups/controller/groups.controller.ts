@@ -17,7 +17,7 @@ export class GroupsController {
   }
 
   @Get()
-  findAll(): Promise<any[]> {
+  findAll() {
     return this.groupsService.findAllForUser(currentUser)
   }
 
