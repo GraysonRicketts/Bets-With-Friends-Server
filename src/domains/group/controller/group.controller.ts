@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateGroupDto } from '../dto/create-group.dto';
-import { GroupsService } from '../service/groups.service';
+import { GroupService } from '../service/group.service';
 
 const currentUser = '0218e59e-a697-4399-b500-69cccbe1e7d7'
 
-@Controller('groups')
-export class GroupsController {
-  constructor(private readonly groupsService: GroupsService) {
+@Controller('group')
+export class GroupController {
+  constructor(private readonly groupsService: GroupService) {
   }
     @Post()
     create(@Body() createGroupDto: CreateGroupDto) {

@@ -5,12 +5,12 @@ import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
-export class GroupsService {
+export class GroupService {
   constructor(
     private prisma: PrismaService,
     private readonly logger: CustomLogger,
   ) {
-    this.logger.setContext(GroupsService.name);
+    this.logger.setContext(GroupService.name);
   }
 
   async create(name: string, ownerId: string): Promise<Group> {

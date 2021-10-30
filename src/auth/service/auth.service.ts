@@ -2,8 +2,8 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   UserService,
   UserWithPassword,
-} from '../domains/users/service/user.service';
-import { LoginDto } from './dto/log-in.dto';
+} from '../../domains/user/service/user.service';
+import { LoginDto } from './../dto/log-in.dto';
 
 @Injectable()
 export class AuthService {
