@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Group } from '@prisma/client';
-import { group } from 'console';
+import { PrivelegeLevel } from '@prisma/client'
 import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
 
@@ -17,10 +17,10 @@ export class GroupsService {
     return this.prisma.group.create({
       data: {
         name,
-        ownerId,
         userGroup: {
           create: {
             userId: ownerId,
+            role: PrivelegeLevel.ADD_MEMBER
           },
         },
       },

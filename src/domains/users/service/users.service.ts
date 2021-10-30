@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { uuid } from 'src/types';
 import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { CreateLocalUserDto } from '../dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -20,8 +20,8 @@ export class UsersService {
     });
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const { name } = createUserDto;
-    return this.prisma.user.create({ data: { name } });
+  async create(createUserDto: CreateLocalUserDto): Promise<User> {
+    const { displayName, email, password } = createUserDto;
+    return this.prisma.user.create({ data: { displayName, email, password } });
   }
 }
