@@ -54,6 +54,7 @@ model Group {
   name      String
   userGroup UserGroup[]
   bet       Bet[]
+  category Category[]
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -75,15 +76,17 @@ model Audit {
 model Bet {
   title String
 
-  category Category?
+  category Category?  @relation(fields: [categoryId], references: [id])
+  categoryId String? @map("category_id")@unique
+
   option   Option[]
 
   closedAt   DateTime? @map("closed_at") @db.Timestamptz(3)
   closedBy   User?     @relation(fields: [closedById], references: [id])
   closedById String?   @map("closed_by_id")
 
-  group   Group  @relation(fields: [groupId], references: [id])
-  groupId String @map("group_id")
+  group   Group?  @relation(fields: [groupId], references: [id])
+  groupId String? @map("group_id")
 
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
@@ -109,14 +112,16 @@ model Option {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   @@map("option")
-  Wager Wager[]
+  wager Wager[]
 }
 
 model Category {
   name String
 
-  bet   Bet    @relation(fields: [betId], references: [id])
-  betId String @map("bet_id")@unique
+  bet   Bet[]
+  
+  group Group  @relation(fields: [groupId], references: [id])
+  groupId String @map("group_id")
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)

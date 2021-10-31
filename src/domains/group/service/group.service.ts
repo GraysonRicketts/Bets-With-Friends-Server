@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrivelegeLevel } from '@prisma/client';
 import { CustomLogger } from '../../../logger/CustomLogger';
@@ -60,5 +60,25 @@ export class GroupService {
   async addUserToGroup(userId: string, groupId: string, role = PrivelegeLevel.ADD_MEMBER) {
     await this.prisma.userGroup.create({data: { userId, groupId, role }})
     return this.findOne(groupId);
+  }
+
+  async verifyUserIsMemberOfGroup(userId: string, groupId: string) {
+    const group = await this.findOne(groupId);
+    
+    // Make sure group exists
+    if (!group) {
+      this.logger.log('Group not found', undefined, { userId, groupId });
+        return false
+    }
+
+    // Make sure user is in the group
+    const user = group.userGroup.find(ug => ug.user.id === userId);
+
+    if (!user) {
+      this.logger.log('User not member of group', undefined, { userId, groupId });
+      return false
+    }
+
+    return true;
   }
 }

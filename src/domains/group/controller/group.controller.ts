@@ -13,6 +13,7 @@ import { GroupService } from '../service/group.service';
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupsService: GroupService) {}
+
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createGroupDto: CreateGroupDto, @Request() req) {

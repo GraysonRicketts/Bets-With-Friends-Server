@@ -11,7 +11,7 @@ const levels = {
   info: 3,
 };
 
-type LogContext = { [key: string]: string | number };
+type LogContext = { [key: string]: string | number | string[] | number[] };
 const dateFormat = () => {
   return new Date(Date.now()).toUTCString();
 };
