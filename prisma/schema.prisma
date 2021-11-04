@@ -79,6 +79,7 @@ model Bet {
   category Category?  @relation(fields: [categoryId], references: [id])
   categoryId String? @map("category_id")@unique
 
+  wager Wager[]
   option   Option[]
 
   closedAt   DateTime? @map("closed_at") @db.Timestamptz(3)
@@ -95,7 +96,6 @@ model Bet {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   @@map("bet")
-  Wager Wager[]
 }
 
 model Option {

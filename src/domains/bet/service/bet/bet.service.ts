@@ -77,13 +77,22 @@ export class BetService {
       }
     });
 
-    const options = await this.prisma.option.createMany({ data: optionNames.map(o => ({ name: o, betId: bet.id }))})
-    const creatorOption = options.find(o => o.name === wagerOption)
+    await this.prisma.option.createMany({ data: optionNames.map(o => ({ name: o, betId: bet.id }))})
+    const creatorOptions = await this.prisma.option.findMany({ select: {
+      id: true
+    }, where: {
+      name: wagerOption,
+      betId: bet.id 
+    }})
+    if (creatorOptions.length !== 1) {
+      const err = new InternalServerErrorException('This should never happen');
+      this.logger.error(err.message, err.stack, undefined, { creatorOptions: creatorOptions.map(c => c.id) })
+    }
 
     // Create wager
     const wager = await this.prisma.wager.create({ data: {
       betId: bet.id,
-      optionId: creatorOption.id,
+      optionId: creatorOptions[0].id,
       amount: wagerAmount,
       userId: creatorId
     }})
@@ -106,7 +115,19 @@ export class BetService {
         },
         wager: {
           select: {
-            
+            amount: true,
+            option: {
+              select: {
+                id: true,
+                name: true
+              }
+            },
+            user: {
+              select: {
+                id: true,
+                displayName: true
+              }
+            }
           }
         }
       },
