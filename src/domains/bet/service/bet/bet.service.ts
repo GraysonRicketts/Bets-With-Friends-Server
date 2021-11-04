@@ -19,10 +19,18 @@ interface CreateBetData {
   wagerAmount: number;
 }
 
+interface PlaceWagerData {
+  creatorId: string;
+  betId: string;
+  optionId: string;
+  amount: number;
+}
+
 const baseBet = Prisma.validator<Prisma.BetArgs>()({
   select: {
     id: true,
     title: true,
+    groupId: true,
     category: {
       select: {
         name: true,
@@ -75,23 +83,7 @@ export class BetService {
       wagerAmount,
     } = data;
 
-    // Get the group
-    const isMember = await this.groupService.verifyUserIsMemberOfGroup(
-      creatorId,
-      groupId,
-    );
-
-    // Make sure the user is in the group
-    if (!isMember) {
-      const err = new BadRequestException();
-      this.logger.error(
-        'Failed verifying user is in group',
-        err.stack,
-        undefined,
-        { ...data },
-      );
-      throw err;
-    }
+    await this.validateIsMember(creatorId, groupId);
 
     
     let category: Category | undefined;
@@ -143,10 +135,82 @@ export class BetService {
     return betWithEveryting
   }
 
+  async placeWager(data: PlaceWagerData) {
+    const { creatorId, betId, optionId, amount } = data;
+
+    const bet = await this.prisma.bet.findUnique({ ...baseBet, where: { id: betId } });
+    if (!bet) {
+      const err = new BadRequestException();
+      this.logger.error(
+        'Bet does not exist',
+        err.stack,
+        undefined,
+        { ...data },
+      );
+      throw err;
+    }
+
+    if (!bet.groupId) {
+      const err = new InternalServerErrorException();
+      this.logger.error(
+        'Should always have groupId',
+        err.stack,
+        undefined,
+        { ...data },
+      );
+      throw err;
+    }
+    await this.validateIsMember(creatorId, bet.groupId)
+
+    if (!bet.option.find(o => o.id === optionId)) {
+      const err = new BadRequestException();
+      this.logger.error(
+        'Option does not exist',
+        err.stack,
+        undefined,
+        { ...data, options: bet.option.map(o => o.id) },
+      );
+      throw err;
+    }
+
+    if (bet.wager.find(w =>  w.user.id === creatorId)) {
+      const err = new BadRequestException();
+      this.logger.error(
+        'User already placed wager',
+        err.stack,
+        undefined,
+        { ...data },
+      );
+      throw err;
+    }
+
+    return this.prisma.wager.create({data: {
+      betId,
+      userId: creatorId,
+      optionId,
+      amount
+    }, select: {
+      id: true,
+      betId: true,
+      optionId: true
+    }})
+  }
+
   async findForGroup(params: {groupId: string, userId: string}) {
     const { userId, groupId } = params;
-    
-    const isMember = await this.groupService.verifyUserIsMemberOfGroup(
+
+    await this.validateIsMember(userId, groupId)
+
+    return this.prisma.bet.findMany({
+      ...baseBet,
+      where: {
+        groupId
+      }
+    })
+  }
+
+  private async validateIsMember(userId: string, groupId: string) {
+    const isMember = await this.groupService.isMemberOfGroup(
       userId,
       groupId,
     );
@@ -162,12 +226,5 @@ export class BetService {
       );
       throw err;
     }
-
-    return this.prisma.bet.findMany({
-      ...baseBet,
-      where: {
-        groupId
-      }
-    })
   }
 }

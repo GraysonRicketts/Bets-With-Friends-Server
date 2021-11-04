@@ -62,7 +62,7 @@ export class GroupService {
     return this.findOne(groupId);
   }
 
-  async verifyUserIsMemberOfGroup(userId: string, groupId: string) {
+  async isMemberOfGroup(userId: string, groupId: string) {
     const group = await this.findOne(groupId);
     
     // Make sure group exists
