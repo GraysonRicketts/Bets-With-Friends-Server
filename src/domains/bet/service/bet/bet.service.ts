@@ -19,6 +19,40 @@ interface CreateBetData {
   wagerAmount: number;
 }
 
+const baseBet = Prisma.validator<Prisma.BetArgs>()({
+  select: {
+    id: true,
+    title: true,
+    category: {
+      select: {
+        name: true,
+      },
+    },
+    option: {
+      select: {
+        name: true,
+        id: true,
+      },
+    },
+    wager: {
+      select: {
+        amount: true,
+        option: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            displayName: true
+          }
+        }
+      }
+    }
+}})
+
 @Injectable()
 export class BetService {
   constructor(
@@ -90,7 +124,7 @@ export class BetService {
     }
 
     // Create wager
-    const wager = await this.prisma.wager.create({ data: {
+    await this.prisma.wager.create({ data: {
       betId: bet.id,
       optionId: creatorOptions[0].id,
       amount: wagerAmount,
@@ -99,38 +133,7 @@ export class BetService {
 
     // Find bet with information
     const betWithEveryting = this.prisma.bet.findUnique({
-      select: {
-        id: true,
-        title: true,
-        category: {
-          select: {
-            name: true,
-          },
-        },
-        option: {
-          select: {
-            name: true,
-            id: true,
-          },
-        },
-        wager: {
-          select: {
-            amount: true,
-            option: {
-              select: {
-                id: true,
-                name: true
-              }
-            },
-            user: {
-              select: {
-                id: true,
-                displayName: true
-              }
-            }
-          }
-        }
-      },
+      ...baseBet,
       where: { id: bet.id}
     })
     if (!betWithEveryting) {
@@ -138,5 +141,33 @@ export class BetService {
     }
 
     return betWithEveryting
+  }
+
+  async findForGroup(params: {groupId: string, userId: string}) {
+    const { userId, groupId } = params;
+    
+    const isMember = await this.groupService.verifyUserIsMemberOfGroup(
+      userId,
+      groupId,
+    );
+
+    // Make sure the user is in the group
+    if (!isMember) {
+      const err = new BadRequestException();
+      this.logger.error(
+        'Failed verifying user is in group',
+        err.stack,
+        undefined,
+        { userId, groupId },
+      );
+      throw err;
+    }
+
+    return this.prisma.bet.findMany({
+      ...baseBet,
+      where: {
+        groupId
+      }
+    })
   }
 }
