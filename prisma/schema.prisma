@@ -13,19 +13,21 @@ datasource db {
 model User {
   displayName String @map("display_name")
   email       String @unique @map("user_name")
+  score Int @default(300)
 
   password String?
 
   userGroup UserGroup[]
   closedBet Bet[]
+  wager Wager[]
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+  version Int @default(0)
 
   @@map("user")
-  Wager Wager[]
 }
 
 model UserGroup {

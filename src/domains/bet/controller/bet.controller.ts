@@ -2,6 +2,7 @@ import { Body, Controller, Post, UseGuards, Request, Get, Query } from '@nestjs/
 import { JwtAuthGuard } from '../../../auth/guard/jwt-auth.guard';
 import { CreateBetDto } from '../dto/create-bet.dto';
 import { CreateWagerDto } from '../dto/create-wager.dto';
+import { FinalizeBetDto } from '../dto/finalize-bet.dto';
 import { BetService } from '../service/bet/bet.service';
 
 @UseGuards(JwtAuthGuard)
@@ -28,5 +29,13 @@ export class BetController {
     const creatorId = req.user.id;
 
     return this.betService.placeWager({ ...createWagerDto, creatorId });
+  }
+
+  @Post('finalize')
+  finalizeBet(@Body() finalizeDto: FinalizeBetDto, @Request() req) {
+    const userId = req.user.id;
+    const { betId, winningOptionId } = finalizeDto;
+
+    return this.betService.finalizeBet({ userId, betId, winningOptionId })
   }
 }
