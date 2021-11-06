@@ -30,10 +30,49 @@ const wagerUser = Prisma.validator<Prisma.UserArgs>()({
     }
   } },
 });
+const friendsUser = Prisma.validator<Prisma.UserArgs>()({
+  select: {
+    ...baseUser.select,
+    friends: {
+      select: {
+        friend: {
+          select: {
+            id: true,
+            email: true,
+            score: true
+          } 
+        }
+      }
+    },
+    sentFriendRequests: {
+      select: {
+        id: true,
+        userTo: {
+          select: {
+            id: true,
+            email: true
+          } 
+        }
+      }
+    },
+    receivedFriendRequests: {
+      select: {
+        id: true,
+        userFrom: {
+          select: {
+            id: true,
+            email: true
+          } 
+        }
+      }
+    }
+  }
+})
 
 export type BaseUserPayload = Prisma.UserGetPayload<typeof baseUser>;
 export type UserWithPasswordPayload = Prisma.UserGetPayload<typeof passwordUser>;
 export type UserWithWagerPayload = Prisma.UserGetPayload<typeof wagerUser>;
+export type UserWithFriendPayload = Prisma.UserGetPayload<typeof friendsUser>
 
 interface FindParams {
   email?: string;
@@ -42,6 +81,7 @@ interface FindParams {
 interface FindOpts {
   withPassword: boolean;
   withWager: boolean;
+  withFriend: boolean;
 }
 
 @Injectable()
@@ -56,7 +96,7 @@ export class UserService {
   async findUnique(
     params: FindParams,
     opts?: Partial<FindOpts> | undefined,
-  ): Promise<BaseUserPayload | UserWithPasswordPayload | UserWithWagerPayload | null> {
+  ): Promise<BaseUserPayload | UserWithPasswordPayload | UserWithWagerPayload | UserWithFriendPayload | null> {
     const { email, id } = params;
     if (!email && !id) {
       return Promise.resolve(null);
@@ -74,6 +114,13 @@ export class UserService {
     if (opts?.withWager) {
       return this.prisma.user.findUnique({
         ...wagerUser,
+        where,
+      });
+    }
+
+    if (opts?.withFriend) {
+      return this.prisma.user.findUnique({
+        ...friendsUser,
         where,
       });
     }

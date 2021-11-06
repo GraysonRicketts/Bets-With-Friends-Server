@@ -11,8 +11,8 @@ datasource db {
 }
 
 model Friend {
-  friender User @relation("to_friend", fields: [frienderId], references: [id])
-  frienderId String @map("friender_id")
+  friend User @relation("to_friend", fields: [friendId], references: [id])
+  friendId String @map("friend_id")
 
   friended User @relation("from_friend", fields: [friendedId], references: [id])
   friendedId String @map("friended_id")

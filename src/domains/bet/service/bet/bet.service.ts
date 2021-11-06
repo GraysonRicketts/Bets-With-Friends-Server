@@ -128,6 +128,7 @@ export class BetService {
       this.logger.error(err.message, err.stack, undefined, {
         creatorOptions: creatorOptions.map((c) => c.id),
       });
+      throw err;
     }
 
     // Create wager
