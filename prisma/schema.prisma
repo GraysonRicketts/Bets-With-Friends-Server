@@ -10,6 +10,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Friend {
+  friender User @relation("to_friend", fields: [frienderId], references: [id])
+  frienderId String @map("friender_id")
+
+  friended User @relation("from_friend", fields: [friendedId], references: [id])
+  friendedId String @map("friended_id")
+
+  id        String    @id @default(dbgenerated("gen_random_uuid ()"))
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  @@map("friend")
+}
+model FriendRequest {
+  userTo User @relation("to_request", fields: [userToId], references: [id])
+  userToId String @map("user_to_id")
+
+  userFrom User @relation("from_request", fields: [userFromId], references: [id])
+  userFromId String @map("user_from_id")
+
+
+  id        String    @id @default(dbgenerated("gen_random_uuid ()"))
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
+
+  @@map("friend_request")
+}
 model User {
   displayName String @map("display_name")
   email       String @unique @map("user_name")
@@ -17,9 +46,16 @@ model User {
 
   password String?
 
+  friends Friend[] @relation("to_friend")
+  friendss Friend[] @relation("from_friend")
+
+  sentFriendRequests FriendRequest[] @relation("from_request")
+  receivedFriendRequests FriendRequest[] @relation("to_request")
+
   userGroup UserGroup[]
   closedBet Bet[]
   wager Wager[]
+  
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -29,7 +65,6 @@ model User {
 
   @@map("user")
 }
-
 model UserGroup {
   user    User   @relation(fields: [userId], references: [id])
   userId  String @map("user_id")
@@ -45,7 +80,6 @@ model UserGroup {
 
   @@map("user_group")
 }
-
 enum PrivelegeLevel {
   OWNER
   ADD_MEMBER
@@ -54,9 +88,9 @@ enum PrivelegeLevel {
 
 model Group {
   name      String
-  userGroup UserGroup[]
-  bet       Bet[]
-  category Category[]
+  userGroups UserGroup[]
+  bets       Bet[]
+  categories Category[]
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -66,30 +100,21 @@ model Group {
   @@map("group")
 }
 
-model Audit {
-  id        String   @id @default(dbgenerated("gen_random_uuid ()"))
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  before    Json?
-  diff      Json?
-
-  @@map("audit")
-}
-
 model Bet {
   title String
 
   category Category?  @relation(fields: [categoryId], references: [id])
   categoryId String? @map("category_id")@unique
 
-  wager Wager[]
-  option   Option[]
+  wagers Wager[]
+  options   Option[]
 
   closedAt   DateTime? @map("closed_at") @db.Timestamptz(3)
   closedBy   User?     @relation(fields: [closedById], references: [id])
   closedById String?   @map("closed_by_id")
 
-  group   Group?  @relation(fields: [groupId], references: [id])
-  groupId String? @map("group_id")
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String @map("group_id")
 
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
@@ -99,14 +124,13 @@ model Bet {
 
   @@map("bet")
 }
-
 model Option {
   name String
 
   bet   Bet    @relation(fields: [betId], references: [id])
   betId String @map("bet_id")
 
-  finalOption Boolean @default(false)
+  isFinalOption Boolean @map("is_final_option") @default(false)
 
   id        String    @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -116,11 +140,10 @@ model Option {
   @@map("option")
   wager Wager[]
 }
-
 model Category {
   name String
 
-  bet   Bet[]
+  bets   Bet[]
   
   group Group  @relation(fields: [groupId], references: [id])
   groupId String @map("group_id")
@@ -132,7 +155,6 @@ model Category {
 
   @@map("category")
 }
-
 model Wager {
   amount Int
 
@@ -151,4 +173,15 @@ model Wager {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(3)
 
   @@map("wager")
+}
+
+model Audit {
+  id        String   @id @default(dbgenerated("gen_random_uuid ()"))
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  before    Json?
+  diff      Json?
+  userId  String? @map("user_id")
+  traceId String? @map("trace_id")
+
+  @@map("audit")
 }

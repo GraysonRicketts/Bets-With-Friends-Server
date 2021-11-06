@@ -9,7 +9,7 @@ const baseGroup = Prisma.validator<Prisma.GroupArgs>()({
   select: {
     id: true,
     name: true,
-    userGroup: {
+    userGroups: {
       select: {
         id: true,
         role: true,
@@ -32,7 +32,7 @@ export class GroupService {
     return this.prisma.group.create({
       data: {
         name,
-        userGroup: {
+        userGroups: {
           create: {
             userId: ownerId,
             role: PrivelegeLevel.ADD_MEMBER,
@@ -45,7 +45,7 @@ export class GroupService {
 
   findAllForUser(userId: string) {
     return this.prisma.group.findMany({
-      where: { userGroup: { every: { user: { is: { id: userId } } } } },
+      where: { userGroups: { every: { user: { is: { id: userId } } } } },
       select: baseGroup.select,
     });
   }
@@ -72,7 +72,7 @@ export class GroupService {
     }
 
     // Make sure user is in the group
-    const user = group.userGroup.find(ug => ug.user.id === userId);
+    const user = group.userGroups.find(ug => ug.user.id === userId);
 
     if (!user) {
       this.logger.log('User not member of group', undefined, { userId, groupId });

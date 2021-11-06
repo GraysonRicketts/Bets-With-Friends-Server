@@ -38,13 +38,13 @@ const baseBet = Prisma.validator<Prisma.BetArgs>()({
         name: true,
       },
     },
-    option: {
+    options: {
       select: {
         name: true,
         id: true,
       },
     },
-    wager: {
+    wagers: {
       select: {
         id: true,
         amount: true,
@@ -158,16 +158,16 @@ export class BetService {
 
     await this.validateIsMember(creatorId, bet.groupId);
 
-    if (!bet.option.find((o) => o.id === optionId)) {
+    if (!bet.options.find((o) => o.id === optionId)) {
       const err = new BadRequestException();
       this.logger.error('Option does not exist', err.stack, undefined, {
         ...data,
-        options: bet.option.map((o) => o.id),
+        options: bet.options.map((o) => o.id),
       });
       throw err;
     }
 
-    if (bet.wager.find((w) => w.user.id === creatorId)) {
+    if (bet.wagers.find((w) => w.user.id === creatorId)) {
       const err = new BadRequestException();
       this.logger.error('User already placed wager', err.stack, undefined, {
         ...data,
@@ -213,7 +213,7 @@ export class BetService {
     const bet = await this.getBet(betId);
 
     await this.validateIsMember(userId, bet.groupId);
-    if (!bet.option.find((o) => o.id === winningOptionId)) {
+    if (!bet.options.find((o) => o.id === winningOptionId)) {
       const err = new BadRequestException();
       this.logger.error('Invalid winning option', err.stack, undefined, {
         userId,
@@ -224,12 +224,12 @@ export class BetService {
     }
 
     // Find winners
-    const winningWagers = bet.wager.filter(
+    const winningWagers = bet.wagers.filter(
       (w) => w.option.id === winningOptionId,
     );
     
     // Sum pool
-    const pool = bet.wager.map(w => w.amount).reduce((pv, cv) => pv + cv, 0);
+    const pool = bet.wagers.map(w => w.amount).reduce((pv, cv) => pv + cv, 0);
     const winnersPool = winningWagers.map(w => w.amount).reduce((pv, cv) => pv + cv, 0);
     
     // If there are winners and not everyone is a winner
@@ -254,7 +254,7 @@ export class BetService {
       }))
 
       // Remove score from users
-      const losingWagers = bet.wager.filter(w => !winningWagers.find(ww => ww.id !== w.id))
+      const losingWagers = bet.wagers.filter(w => !winningWagers.find(ww => ww.id !== w.id))
       updates.push(...losingWagers.map(w => {
         return this.prisma.user.updateMany({ data: {
           score: {
@@ -285,7 +285,7 @@ export class BetService {
     return [
       this.prisma.option.update({
         data: {
-          finalOption: true,
+          isFinalOption: true,
         },
         where: {
           id: winningOptionId,
