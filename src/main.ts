@@ -12,6 +12,7 @@ import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
 import { PORT } from './env/env.constants';
+import { fastifyHelmet } from 'fastify-helmet';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 
@@ -21,7 +22,7 @@ async function bootstrap() {
   // Create app
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(), 
+    new FastifyAdapter()
   );
 
   // Swagger configuration
@@ -41,6 +42,8 @@ async function bootstrap() {
   // See https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks
   const prismaService: PrismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app)
+
+  await app.register(fastifyHelmet);
 
   await app.listen(PORT || 5000);
 }
