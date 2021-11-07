@@ -13,6 +13,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
 import { PORT } from './env/env.constants';
 import { fastifyHelmet } from 'fastify-helmet';
+import { ValidationPipe } from '@nestjs/common';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 
@@ -44,7 +45,11 @@ async function bootstrap() {
   const prismaService: PrismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app)
 
+  // Add security headers
   await app.register(fastifyHelmet);
+
+  // Add validation pipes for app
+  app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(PORT || 5000);
 }

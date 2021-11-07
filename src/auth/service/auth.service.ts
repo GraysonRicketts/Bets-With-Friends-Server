@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import {
   BaseUserPayload,
   UserService,
@@ -44,6 +44,11 @@ export class AuthService {
 
   async createAccount(displayName, email, rawPassword) {
     const password = this.encrypt(rawPassword);
+
+    const user = await this.userService.findUnique({ email })
+    if (!!user) {
+      throw new BadRequestException('User aready exsits with that email');
+    }
     
     return this.userService.create({ displayName, email, password})
   }
