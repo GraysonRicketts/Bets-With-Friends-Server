@@ -51,6 +51,9 @@ async function bootstrap() {
   // Add validation pipes for app
   app.useGlobalPipes(new ValidationPipe());
 
+  // Set global router prefix
+  app.setGlobalPrefix('api/v1');
+
   await app.listen(PORT || 5000);
 }
 bootstrap();

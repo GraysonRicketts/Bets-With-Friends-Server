@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import {
   BaseUserPayload,
   UserService,
@@ -11,7 +15,10 @@ import { CIPHER_SECRET } from '../../env/env.constants';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UserService, private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async validateUser(loginDto: LoginDto) {
     const { email, password } = loginDto;
@@ -21,10 +28,10 @@ export class AuthService {
       { withPassword: true },
     )) as UserWithPasswordPayload;
     if (!user.password) {
-        throw new InternalServerErrorException('Should always have password');
+      throw new InternalServerErrorException('Should always have password');
     }
 
-    const encyrptedPassword = this.encrypt(password)
+    const encyrptedPassword = this.encrypt(password);
 
     if (user && user.password === encyrptedPassword) {
       const { password, ...result } = user;
@@ -35,32 +42,43 @@ export class AuthService {
   }
 
   async getJwtToken(user: BaseUserPayload) {
-    const payload = { displayName: user.displayName, sub: user.id }
+    const payload = { displayName: user.displayName, sub: user.id };
 
     return {
-      accessToken: this.jwtService.sign(payload)
-    }
+      accessToken: this.jwtService.sign(payload),
+    };
   }
 
   async createAccount(displayName, email, rawPassword) {
     const password = this.encrypt(rawPassword);
 
-    const user = await this.userService.findUnique({ email })
+    const user = await this.userService.findUnique({ email });
     if (!!user) {
       throw new BadRequestException('User aready exsits with that email');
     }
-    
-    return this.userService.create({ displayName, email, password})
+
+    const newUser = await this.userService.create({
+      displayName,
+      email,
+      password,
+    });
+    return { token: this.getJwtToken(newUser), displayName };
   }
 
   private encrypt(password: string): string {
     if (!CIPHER_SECRET) {
       throw new InternalServerErrorException('Missing environment variable');
     }
-    const secretKey = Buffer.from(CIPHER_SECRET, "utf-8").slice(0, 32);
+    const secretKey = Buffer.from(CIPHER_SECRET, 'utf-8').slice(0, 32);
 
-    const encryptedData = pbkdf2Sync(password, secretKey, 1000, 64, `sha512`).toString('utf-8');
+    const encryptedData = pbkdf2Sync(
+      password,
+      secretKey,
+      1000,
+      64,
+      `sha512`,
+    ).toString('utf-8');
 
-    return encryptedData
+    return encryptedData;
   }
 }
