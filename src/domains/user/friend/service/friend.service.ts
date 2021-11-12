@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
-import { CustomLogger } from '../../../logger/CustomLogger';
-import { PrismaService } from '../../../prisma/prisma.service';
-import { UserService, UserWithFriendPayload } from '../service/user.service';
+import { CustomLogger } from '../../../../logger/CustomLogger';
+import { PrismaService } from '../../../../prisma/prisma.service';
+import { UserService, UserWithFriendPayload } from '../../service/user.service';
 
 @Injectable()
 export class FriendService {
@@ -78,6 +78,8 @@ export class FriendService {
         userFromId: userId,
       },
     });
+
+    return friend;
   }
 
   async removeFriend(friendId: string, userId: string) {

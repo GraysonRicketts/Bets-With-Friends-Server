@@ -41,10 +41,13 @@ export class AuthService {
     return null;
   }
 
-  async getJwtToken(user: BaseUserPayload) {
-    const payload = { displayName: user.displayName, sub: user.id };
+  async login(user: BaseUserPayload) {
+    const { id, displayName } = user;
+    const payload = { displayName, sub: id };
 
     return {
+      id,
+      displayName,
       accessToken: this.jwtService.sign(payload),
     };
   }
@@ -62,7 +65,8 @@ export class AuthService {
       email,
       password,
     });
-    return { token: this.getJwtToken(newUser), displayName };
+    
+    return this.login(newUser);
   }
 
   private encrypt(password: string): string {

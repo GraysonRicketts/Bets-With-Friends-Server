@@ -10,13 +10,13 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    return this.authService.getJwtToken(req.user);
+    return await this.authService.login(req.user);
   }
 
   @Post('create')
   async create(@Body() data: CreateLocalUserDto) {
     const { displayName, email, password } = data;
     
-    return this.authService.createAccount(displayName, email, password);
+    return await this.authService.createAccount(displayName, email, password);
   }
 }
