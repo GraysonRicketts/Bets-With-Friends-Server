@@ -10,11 +10,11 @@ import { JwtAuthGuard } from '../../../auth/guard/jwt-auth.guard';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { GroupService } from '../service/group.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('group')
 export class GroupController {
   constructor(private readonly groupsService: GroupService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createGroupDto: CreateGroupDto, @Request() req) {
     const { name } = createGroupDto;
@@ -23,7 +23,6 @@ export class GroupController {
     return this.groupsService.create(name, currentUserId);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Request() req) {
     const currentUserId = req.user.id;
@@ -35,3 +34,4 @@ export class GroupController {
   //   return this.groupsService.findOne(id);
   // }
 }
+

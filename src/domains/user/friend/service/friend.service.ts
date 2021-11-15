@@ -34,12 +34,17 @@ export class FriendService {
       { withFriend: true },
     )) as UserWithFriendPayload;
     if (!friend) {
-      const err = new BadRequestException();
+      const err = new BadRequestException('Your friend does not have an account linked to this email');
       this.logger.error('Friend does not exist', err.stack, undefined, {
         friendEmail,
         userId,
       });
       throw err;
+    }
+
+    // Validate user is not friend
+    if (user.id === friend.id) {
+      throw new BadRequestException('You cannot add yourself as a friend');
     }
 
     // Validate user and friend aren't already friends
