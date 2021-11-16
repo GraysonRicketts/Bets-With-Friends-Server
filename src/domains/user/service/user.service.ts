@@ -6,7 +6,6 @@ import { CreateLocalUserDto } from '../../../auth/dto/create-user.dto';
 
 export const baseUser = Prisma.validator<Prisma.UserArgs>()({
   select: { id:true, email: true, displayName: true, score: true, version: true },
-  
 });
 const passwordUser = Prisma.validator<Prisma.UserArgs>()({
   select: { ...baseUser.select, password: true },

@@ -1,10 +1,58 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CustomLogger } from '../../../../logger/CustomLogger';
 import { PrismaService } from '../../../../prisma/prisma.service';
-import { UserService, UserWithFriendPayload } from '../../service/user.service';
+import { UserService, UserWithFriendPayload, baseUser } from '../../service/user.service';
+
+export const baseFriendRequest = Prisma.validator<Prisma.FriendRequestArgs>()({
+  select: {
+    id: true,
+    userTo: {
+      select: {
+        ...baseUser.select
+      }
+    },
+    userFrom: {
+      select: {
+        ...baseUser.select
+      }
+    },
+    createdAt: true
+  }
+});
+export type FriendRequest = Prisma.FriendRequestGetPayload<typeof baseFriendRequest>;
+
+interface FriendRequests {
+  to: FriendRequest[];
+  from: FriendRequest[];
+}
 
 @Injectable()
 export class FriendService {
+  async getFriendRequestsForUser(userId: string): Promise<FriendRequests> {
+    const requests = await this.prisma.friendRequest.findMany({
+      ...baseFriendRequest,
+      where: {
+        userFromId: userId,
+        OR: {
+          userToId: userId
+        }
+      }
+    })
+
+    const from = requests.filter(r => r.userFrom.id === userId);
+    const to = requests.filter(r => r.userTo.id === userId);
+
+    return {
+      from,
+      to
+    }
+  }
+
+  getFriendsForUser(userId: string) {
+      throw new Error('Method not implemented.');
+  }
+
   constructor(
     private readonly logger: CustomLogger,
     private readonly userService: UserService,
