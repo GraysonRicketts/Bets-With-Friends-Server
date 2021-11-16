@@ -48,7 +48,7 @@ export class FriendService {
     }
 
     // Validate user and friend aren't already friends
-    if (!user.friends.find((f) => f.friend.id === friend.id)) {
+    if (user.friends.find((f) => f.friend.id === friend.id)) {
       const err = new BadRequestException(`You're already friends`);
       this.logger.error(err.message, err.stack, undefined, {
         friendEmail,
