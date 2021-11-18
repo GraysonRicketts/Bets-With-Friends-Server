@@ -22,7 +22,7 @@ export const baseFriendRequest = Prisma.validator<Prisma.FriendRequestArgs>()({
 });
 export type FriendRequest = Prisma.FriendRequestGetPayload<typeof baseFriendRequest>;
 
-interface FriendRequests {
+export interface FriendRequests {
   to: FriendRequest[];
   from: FriendRequest[];
 }

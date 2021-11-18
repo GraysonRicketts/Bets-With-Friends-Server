@@ -16,17 +16,17 @@ export class FriendController {
         return await this.friendService.addFriend(friendEmail, user.id);
     }
 
-    @Get()
-    async getFriends(@Request() req) {
-        const user = req.user;
-
-        return await this.friendService.getFriendsForUser(user.id);
-    }
-
-    // @Get('requests')
-    // async getFriendRequests(@Request() req) {
+    // @Get()
+    // async getFriends(@Request() req) {
     //     const user = req.user;
 
-    //     return await this.friendService.getFriendRequestsForUser(user.id);
+    //     return await this.friendService.getFriendsForUser(user.id);
     // }
+
+    @Get('/requests')
+    async getFriendRequests(@Request() req) {
+        const user = req.user;
+
+        return await this.friendService.getFriendRequestsForUser(user.id);
+    }
 }
