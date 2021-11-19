@@ -33,10 +33,11 @@ export class FriendService {
     const requests = await this.prisma.friendRequest.findMany({
       ...baseFriendRequest,
       where: {
-        userFromId: userId,
-        OR: {
-          userToId: userId
-        }
+        OR: [
+          {userFromId: userId} ,
+          {userToId: userId} ,
+
+        ]
       }
     })
 
