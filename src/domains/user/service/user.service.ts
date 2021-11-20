@@ -5,29 +5,38 @@ import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateLocalUserDto } from '../../../auth/dto/create-user.dto';
 
 export const baseUser = Prisma.validator<Prisma.UserArgs>()({
-  select: { id:true, email: true, displayName: true, score: true, version: true },
+  select: {
+    id: true,
+    email: true,
+    displayName: true,
+    score: true,
+    version: true,
+  },
 });
 const passwordUser = Prisma.validator<Prisma.UserArgs>()({
   select: { ...baseUser.select, password: true },
 });
 const wagerUser = Prisma.validator<Prisma.UserArgs>()({
-  select: { ...baseUser.select, wager: {
-    select: {
-      bet: {
-        select: {
-          id: true,
-          closedAt: true
-        }
+  select: {
+    ...baseUser.select,
+    wager: {
+      select: {
+        bet: {
+          select: {
+            id: true,
+            closedAt: true,
+          },
+        },
+        amount: true,
+        option: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
-      amount: true,
-      option: {
-        select: {
-          id: true,
-          name: true
-        }
-      }
-    }
-  } },
+    },
+  },
 });
 const friendsUser = Prisma.validator<Prisma.UserArgs>()({
   select: {
@@ -69,9 +78,11 @@ const friendsUser = Prisma.validator<Prisma.UserArgs>()({
 })
 
 export type BaseUserPayload = Prisma.UserGetPayload<typeof baseUser>;
-export type UserWithPasswordPayload = Prisma.UserGetPayload<typeof passwordUser>;
+export type UserWithPasswordPayload = Prisma.UserGetPayload<
+  typeof passwordUser
+>;
 export type UserWithWagerPayload = Prisma.UserGetPayload<typeof wagerUser>;
-export type UserWithFriendPayload = Prisma.UserGetPayload<typeof friendsUser>
+export type UserWithFriendPayload = Prisma.UserGetPayload<typeof friendsUser>;
 
 interface FindParams {
   email?: string;
@@ -95,7 +106,13 @@ export class UserService {
   async findUnique(
     params: FindParams,
     opts?: Partial<FindOpts> | undefined,
-  ): Promise<BaseUserPayload | UserWithPasswordPayload | UserWithWagerPayload | UserWithFriendPayload | null> {
+  ): Promise<
+    | BaseUserPayload
+    | UserWithPasswordPayload
+    | UserWithWagerPayload
+    | UserWithFriendPayload
+    | null
+  > {
     const { email, id } = params;
     if (!email && !id) {
       return Promise.resolve(null);
@@ -103,29 +120,29 @@ export class UserService {
 
     const where = email ? { email } : { id };
 
-    if (opts?.withPassword) {
+    if (!opts) {
       return this.prisma.user.findUnique({
-        ...passwordUser,
+        ...baseUser,
         where,
       });
     }
 
-    if (opts?.withWager) {
-      return this.prisma.user.findUnique({
-        ...wagerUser,
-        where,
-      });
-    }
+    const { withPassword: wp, withWager: ww, withFriend: wf } = opts;
 
-    if (opts?.withFriend) {
-      return this.prisma.user.findUnique({
-        ...friendsUser,
-        where,
-      });
+    let select = {
+      ...baseUser.select
+    };
+    if (wp) {
+      select = {...select, ...passwordUser.select}
     }
-
+    if (ww) {
+      select = { ...select, ...wagerUser.select}
+    }
+    if (wf) {
+      select = { ...select, ...friendsUser.select}
+    }
     return this.prisma.user.findUnique({
-      ...baseUser,
+      select,
       where,
     });
   }
