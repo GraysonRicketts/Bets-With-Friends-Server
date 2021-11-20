@@ -22,6 +22,18 @@ export const baseFriendRequest = Prisma.validator<Prisma.FriendRequestArgs>()({
 });
 export type FriendRequest = Prisma.FriendRequestGetPayload<typeof baseFriendRequest>;
 
+export const baseFriend = Prisma.validator<Prisma.FriendArgs>()({
+  select: {
+    id: true,
+    friend: {
+      select: { ...baseUser.select }
+    }
+  }
+});
+
+
+export type FriendPayload = Prisma.FriendGetPayload<typeof baseFriend>
+
 export interface FriendRequests {
   to: FriendRequest[];
   from: FriendRequest[];
@@ -51,7 +63,13 @@ export class FriendService {
   }
 
   getFriendsForUser(userId: string) {
-      throw new Error('Method not implemented.');
+    return this.prisma.friend.findMany({
+      ...baseFriend
+      ,
+      where: {
+        friendedId: userId
+      }
+    })
   }
 
   constructor(

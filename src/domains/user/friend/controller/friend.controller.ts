@@ -16,12 +16,19 @@ export class FriendController {
         return await this.friendService.addFriend(friendEmail, user.id);
     }
 
-    // @Get()
-    // async getFriends(@Request() req) {
-    //     const user = req.user;
+    @Post('accept')
+    async acceptFriend(@Body() { requestId }: { requestId: string }, @Request() req) {
+        const user = req.user;
 
-    //     return await this.friendService.getFriendsForUser(user.id);
-    // }
+        return await this.friendService.acceptFriendRequest(requestId, user.id);
+    }
+
+    @Get()
+    async getFriends(@Request() req) {
+        const user = req.user;
+
+        return await this.friendService.getFriendsForUser(user.id);
+    }
 
     @Get('/requests')
     async getFriendRequests(@Request() req) {
