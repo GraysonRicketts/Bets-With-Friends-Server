@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrivelegeLevel } from '@prisma/client';
 import { CustomLogger } from '../../../logger/CustomLogger';
@@ -28,19 +28,36 @@ export class GroupService {
     this.logger.setContext(GroupService.name);
   }
 
-  async create(name: string, ownerId: string) {
+  async create(name: string, ownerId: string, members?: string[]) {
+    // TODO: See if members exist
+
+    const newUserGrps = members ?  [ownerId, ...members] : [ownerId];
+
     return this.prisma.group.create({
       data: {
         name,
         userGroups: {
-          create: {
-            userId: ownerId,
+          create: newUserGrps.map(n => ({
+            userId: n,
             role: PrivelegeLevel.ADD_MEMBER,
-          },
+          })),
         },
       },
       select: baseGroup.select,
     });
+  }
+
+  async addMembers(groupId: string, members: string[]) {
+    // TODO: See if members exist
+
+    throw new BadRequestException('Not built yet')
+
+    // return this.prisma.userGroup.create({
+    //   data: members.map(n => ({
+    //     userId: n,
+    //     role: PrivelegeLevel.ADD_MEMBER,
+    //   }))
+    // });
   }
 
   findAllForUser(userId: string) {
