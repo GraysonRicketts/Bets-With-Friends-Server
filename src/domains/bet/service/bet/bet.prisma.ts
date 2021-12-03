@@ -7,6 +7,7 @@ export const baseBet = Prisma.validator<Prisma.BetArgs>()({
       groupId: true,
       category: {
         select: {
+          id: true,
           name: true,
         },
       },
@@ -14,7 +15,15 @@ export const baseBet = Prisma.validator<Prisma.BetArgs>()({
         select: {
           name: true,
           id: true,
+          isFinalOption: true,
         },
+      },
+      closedAt: true,
+      closedBy: {
+        select: {
+          id: true,
+          displayName: true,
+        }
       },
       wagers: {
         select: {
