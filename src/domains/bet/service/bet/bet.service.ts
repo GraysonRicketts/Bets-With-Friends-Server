@@ -10,6 +10,7 @@ import { GroupService } from '../../../group/service/group.service';
 import { CategoryService } from '../category/category.service';
 import { ScoreService } from '../score/score.service';
 import { DateTime } from 'luxon';
+import { baseBet } from './bet.prisma';
 
 interface CreateBetData {
   creatorId: string;
@@ -27,45 +28,6 @@ interface PlaceWagerData {
   optionId: string;
   amount: number;
 }
-
-const baseBet = Prisma.validator<Prisma.BetArgs>()({
-  select: {
-    id: true,
-    title: true,
-    groupId: true,
-    category: {
-      select: {
-        name: true,
-      },
-    },
-    options: {
-      select: {
-        name: true,
-        id: true,
-      },
-    },
-    wagers: {
-      select: {
-        id: true,
-        amount: true,
-        option: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        user: {
-          select: {
-            id: true,
-            displayName: true,
-            version: true
-          },
-        },
-      },
-    },
-  },
-});
-type BaseBet = Prisma.UserGetPayload<typeof baseBet>;
 
 @Injectable()
 export class BetService {

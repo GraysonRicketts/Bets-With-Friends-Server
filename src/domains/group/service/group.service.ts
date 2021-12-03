@@ -1,8 +1,9 @@
-import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrivelegeLevel } from '@prisma/client';
 import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { baseBet } from '../../bet/service/bet/bet.prisma';
 import { baseUser } from '../../user/service/user.service';
 
 const baseGroup = Prisma.validator<Prisma.GroupArgs>()({
@@ -18,6 +19,18 @@ const baseGroup = Prisma.validator<Prisma.GroupArgs>()({
     },
   },
 });
+
+const groupWithBets = Prisma.validator<Prisma.GroupArgs>()({
+  select: {
+    ...baseGroup.select,
+    bets: {
+      select: {
+        ...baseBet.select
+      }
+    }
+  }
+});
+type GroupWithBets = Prisma.GroupGetPayload<typeof groupWithBets>;
 
 @Injectable()
 export class GroupService {
@@ -62,15 +75,15 @@ export class GroupService {
 
   findAllForUser(userId: string) {
     return this.prisma.group.findMany({
-      where: { userGroups: { every: { user: { is: { id: userId } } } } },
+      where: { userGroups: { some: { user: { is: { id: userId } } } } },
       select: baseGroup.select,
     });
   }
   
-  findOne(id: string) {
+  findOne(id: string): Promise<GroupWithBets | null> {
     return this.prisma.group.findUnique({
       where: { id },
-      select: baseGroup.select
+      select: groupWithBets.select
     })
   }
 

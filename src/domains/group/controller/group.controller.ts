@@ -5,7 +5,9 @@ import {
   Request,
   Post,
   UseGuards,
-  ForbiddenException
+  ForbiddenException,
+  Param,
+  NotFoundException
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guard/jwt-auth.guard';
 import { AddMemberDto } from '../dto/add-member.dto';
@@ -44,9 +46,15 @@ export class GroupController {
     return this.groupsService.findAllForUser(currentUserId);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: uuid): Promise<Group> {
-  //   return this.groupsService.findOne(id);
-  // }
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    const group = await this.groupsService.findOne(id);
+
+    if (!group) {
+      return new NotFoundException();
+    }
+
+    return group;
+  }
 }
 
