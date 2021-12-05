@@ -23,6 +23,12 @@ const baseGroup = Prisma.validator<Prisma.GroupArgs>()({
 const groupWithBets = Prisma.validator<Prisma.GroupArgs>()({
   select: {
     ...baseGroup.select,
+    categories: {
+      select: {
+        name: true,
+        id: true
+      }
+    },
     bets: {
       select: {
         ...baseBet.select

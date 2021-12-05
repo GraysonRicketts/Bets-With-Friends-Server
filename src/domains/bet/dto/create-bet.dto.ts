@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { IsOptional } from "class-validator";
 
 export class CreateBetDto {
     @ApiProperty({ required: true})
@@ -10,12 +11,13 @@ export class CreateBetDto {
     @ApiProperty({ required: true})
     options: string[];
 
-    @ApiProperty()
-    category: string;
-
     @ApiProperty({ required: true})
     wagerOption: string
-
+    
     @ApiProperty({ required: true})
     wagerAmount: number
+    
+    @ApiProperty()
+    @IsOptional()
+    category?: string;
 }

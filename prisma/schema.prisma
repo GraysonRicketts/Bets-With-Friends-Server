@@ -104,7 +104,7 @@ model Bet {
   title String
 
   category Category?  @relation(fields: [categoryId], references: [id])
-  categoryId String? @map("category_id")@unique
+  categoryId String? @map("category_id")
 
   wagers Wager[]
   options   Option[]

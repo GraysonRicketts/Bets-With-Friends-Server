@@ -54,6 +54,10 @@ export class BetService {
 
     await this.validateIsMember(creatorId, groupId);
 
+    const betData: { title: string, groupId: string, categoryId?: string} = {
+      title,
+      groupId,
+    }
     let category: Category | undefined;
     if (categoryName) {
       category =
@@ -63,14 +67,12 @@ export class BetService {
       if (!category) {
         category = await this.categoryService.create(categoryName, groupId);
       }
+
+      betData.categoryId = category.id;
     }
 
     const bet = await this.prisma.bet.create({
-      data: {
-        title,
-        groupId,
-        categoryId: category?.id,
-      },
+      data: betData,
     });
 
     await this.prisma.option.createMany({
