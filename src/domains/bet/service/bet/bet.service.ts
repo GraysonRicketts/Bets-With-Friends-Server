@@ -10,7 +10,7 @@ import { GroupService } from '../../../group/service/group.service';
 import { CategoryService } from '../category/category.service';
 import { ScoreService } from '../score/score.service';
 import { DateTime } from 'luxon';
-import { baseBet } from './bet.prisma';
+import { baseBet, baseWager } from './bet.prisma';
 
 interface CreateBetData {
   creatorId: string;
@@ -148,11 +148,7 @@ export class BetService {
         optionId,
         amount,
       },
-      select: {
-        id: true,
-        betId: true,
-        optionId: true,
-      },
+      select: baseWager.select
     });
   }
 
