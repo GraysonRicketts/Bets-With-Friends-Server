@@ -237,6 +237,7 @@ export class BetService {
     // Get updated bet
     return this.getBet(bet.id);
   }
+  
   private closeBet(
     betId: string,
     userId: string,
