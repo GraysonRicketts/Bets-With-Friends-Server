@@ -30,8 +30,9 @@ const groupWithBets = Prisma.validator<Prisma.GroupArgs>()({
       }
     },
     bets: {
-      select: {
-        ...baseBet.select
+      ...baseBet,
+      where: {
+        deletedAt: null
       }
     }
   }

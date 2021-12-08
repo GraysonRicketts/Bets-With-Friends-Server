@@ -52,12 +52,12 @@ export class BetService {
       wagerAmount,
     } = data;
 
-    await this.validateIsMember(creatorId, groupId);
+    await this.validateIsMemberOfGroup(creatorId, groupId);
 
-    const betData: { title: string, groupId: string, categoryId?: string} = {
+    const betData: { title: string; groupId: string; categoryId?: string } = {
       title,
       groupId,
-    }
+    };
     let category: Category | undefined;
     if (categoryName) {
       category =
@@ -121,7 +121,7 @@ export class BetService {
     const { creatorId, betId, optionId, amount } = data;
     const bet = await this.getBet(betId);
 
-    await this.validateIsMember(creatorId, bet.groupId);
+    await this.validateIsMemberOfGroup(creatorId, bet.groupId);
 
     if (!bet.options.find((o) => o.id === optionId)) {
       const err = new BadRequestException();
@@ -148,19 +148,22 @@ export class BetService {
         optionId,
         amount,
       },
-      select: baseWager.select
+      select: baseWager.select,
     });
   }
 
   async findForGroup(params: { groupId: string; userId: string }) {
     const { userId, groupId } = params;
 
-    await this.validateIsMember(userId, groupId);
+    await this.validateIsMemberOfGroup(userId, groupId);
 
     return this.prisma.bet.findMany({
       ...baseBet,
       where: {
-        groupId,
+        AND: {
+          groupId,
+          deletedAt: null
+        }
       },
     });
   }
@@ -173,7 +176,7 @@ export class BetService {
     const { betId, userId, winningOptionId } = params;
     const bet = await this.getBet(betId);
 
-    await this.validateIsMember(userId, bet.groupId);
+    await this.validateIsMemberOfGroup(userId, bet.groupId);
     if (!bet.options.find((o) => o.id === winningOptionId)) {
       const err = new BadRequestException();
       this.logger.error('Invalid winning option', err.stack, undefined, {
@@ -188,56 +191,73 @@ export class BetService {
     const winningWagers = bet.wagers.filter(
       (w) => w.option.id === winningOptionId,
     );
-    
+
     // Sum pool
-    const pool = bet.wagers.map(w => w.amount).reduce((pv, cv) => pv + cv, 0);
-    const winnersPool = winningWagers.map(w => w.amount).reduce((pv, cv) => pv + cv, 0);
-    
+    const pool = bet.wagers.map((w) => w.amount).reduce((pv, cv) => pv + cv, 0);
+    const winnersPool = winningWagers
+      .map((w) => w.amount)
+      .reduce((pv, cv) => pv + cv, 0);
+
     // If there are winners and not everyone is a winner
-    const updates: PrismaPromise<any>[] = []
+    const updates: PrismaPromise<any>[] = [];
     if (winnersPool > 0 && winnersPool < pool) {
       const losersPool = pool - winnersPool;
 
       // Add score to users
-      updates.push(...winningWagers.map(w => {
-        const poolShare = (w.amount / winnersPool) * losersPool;
-        return this.prisma.user.updateMany({ data: {
-          score: {
-            increment: poolShare
-          },
-          version: {
-            increment: 1
-          }
-        }, where: {
-          id: w.user.id,
-          version: w.user.version
-        }})
-      }))
+      updates.push(
+        ...winningWagers.map((w) => {
+          const poolShare = (w.amount / winnersPool) * losersPool;
+          return this.prisma.user.updateMany({
+            data: {
+              score: {
+                increment: poolShare,
+              },
+              version: {
+                increment: 1,
+              },
+            },
+            where: {
+              id: w.user.id,
+              version: w.user.version,
+            },
+          });
+        }),
+      );
 
       // Remove score from users
-      const losingWagers = bet.wagers.filter(w => !winningWagers.find(ww => ww.id !== w.id))
-      updates.push(...losingWagers.map(w => {
-        return this.prisma.user.updateMany({ data: {
-          score: {
-            decrement: w.amount
-          },
-          version: {
-            increment: 1
-          }
-        }, where: {
-          id: w.user.id,
-          version: w.user.version
-        }})
-      }))
+      const losingWagers = bet.wagers.filter(
+        (w) => !winningWagers.find((ww) => ww.id !== w.id),
+      );
+      updates.push(
+        ...losingWagers.map((w) => {
+          return this.prisma.user.updateMany({
+            data: {
+              score: {
+                decrement: w.amount,
+              },
+              version: {
+                increment: 1,
+              },
+            },
+            where: {
+              id: w.user.id,
+              version: w.user.version,
+            },
+          });
+        }),
+      );
     }
-    
+
     // Transactionalize updates and closing bet
-    await this.prisma.$transaction([...updates, ...this.closeBet(bet.id, userId, winningOptionId)]);
+    await this.prisma.$transaction([
+      ...updates,
+      ...this.closeBet(bet.id, userId, winningOptionId),
+    ]);
 
     // Get updated bet
     return this.getBet(bet.id);
   }
-  
+
   private closeBet(
     betId: string,
     userId: string,
@@ -262,29 +282,21 @@ export class BetService {
     ];
   }
 
-  private async getBet(betId: string, ...data) {
+  async getBet(betId: string) {
     const bet = await this.prisma.bet.findUnique({
       ...baseBet,
       where: { id: betId },
     });
     if (!bet) {
       const err = new BadRequestException();
-      this.logger.error('Bet does not exist', err.stack, undefined, { data });
+      this.logger.error('Bet does not exist', err.stack, undefined);
       throw err;
     }
 
     return bet;
   }
 
-  private async validateIsMember(userId: string, groupId?: string | null) {
-    if (!groupId) {
-      const err = new InternalServerErrorException();
-      this.logger.error('Should always have groupId', err.stack, undefined, {
-        userId,
-      });
-      throw err;
-    }
-
+  private async validateIsMemberOfGroup(userId: string, groupId: string) {
     const isMember = await this.groupService.isMemberOfGroup(userId, groupId);
 
     // Make sure the user is in the group
@@ -298,5 +310,44 @@ export class BetService {
       );
       throw err;
     }
+  }
+
+  async delete(id: string, userId?: string) {
+    const bet = await this.getBet(id);
+
+    const usersWhoWagered = bet.wagers.map((w) => w.user);
+    const user = usersWhoWagered.find((u) => u.id === userId);
+    if (userId && !user) {
+      this.logger.error('Not authorized to delete bet');
+      throw new BadRequestException();
+    }
+
+    const nowIso = new Date().toISOString();
+    await this.prisma.$transaction([
+      this.prisma.bet.update({
+        data: {
+          deletedAt: nowIso
+        },
+        where: {
+          id,
+        },
+      }),
+      this.prisma.wager.updateMany({
+        data: {
+          deletedAt: nowIso
+        },
+        where: {
+          betId: id,
+        },
+      }),
+      this.prisma.option.updateMany({
+        data: {
+          deletedAt: nowIso
+        },
+        where: {
+          betId: id,
+        },
+      })
+    ])
   }
 }
