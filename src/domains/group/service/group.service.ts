@@ -26,16 +26,16 @@ const groupWithBets = Prisma.validator<Prisma.GroupArgs>()({
     categories: {
       select: {
         name: true,
-        id: true
-      }
+        id: true,
+      },
     },
     bets: {
       ...baseBet,
       where: {
-        deletedAt: null
-      }
-    }
-  }
+        deletedAt: null,
+      },
+    },
+  },
 });
 type GroupWithBets = Prisma.GroupGetPayload<typeof groupWithBets>;
 
@@ -51,13 +51,13 @@ export class GroupService {
   async create(name: string, ownerId: string, members?: string[]) {
     // TODO: See if members exist
 
-    const newUserGrps = members ?  [ownerId, ...members] : [ownerId];
+    const newUserGrps = members ? [ownerId, ...members] : [ownerId];
 
     return this.prisma.group.create({
       data: {
         name,
         userGroups: {
-          create: newUserGrps.map(n => ({
+          create: newUserGrps.map((n) => ({
             userId: n,
             role: PrivelegeLevel.ADD_MEMBER,
           })),
@@ -67,17 +67,31 @@ export class GroupService {
     });
   }
 
-  async addMembers(groupId: string, members: string[]) {
+  async addMembers(
+    groupId: string,
+    newMembers: string[],
+    role = PrivelegeLevel.ADD_MEMBER,
+  ) {
     // TODO: See if members exist
+    const grp = await this.findOne(groupId);
+    if (!grp) {
+      throw new BadRequestException('Group does not exist');
+    }
 
-    throw new BadRequestException('Not built yet')
+    const userIntersection = grp.userGroups.filter(
+      (ug) => newMembers.find((nm) => nm === ug.user.id),
+    );
+    if (userIntersection.length) {
+      throw new BadRequestException(
+        'Users already part of group',
+        userIntersection.map((ui) => ui.user.id).join(','),
+      );
+    }
 
-    // return this.prisma.userGroup.create({
-    //   data: members.map(n => ({
-    //     userId: n,
-    //     role: PrivelegeLevel.ADD_MEMBER,
-    //   }))
-    // });
+    await this.prisma.userGroup.createMany({
+      data: newMembers.map((nm) => ({ userId: nm, groupId, role })),
+    });
+    return this.findOne(groupId);
   }
 
   findAllForUser(userId: string) {
@@ -86,34 +100,32 @@ export class GroupService {
       select: baseGroup.select,
     });
   }
-  
+
   findOne(id: string): Promise<GroupWithBets | null> {
     return this.prisma.group.findUnique({
       where: { id },
-      select: groupWithBets.select
-    })
-  }
-
-  async addUserToGroup(userId: string, groupId: string, role = PrivelegeLevel.ADD_MEMBER) {
-    await this.prisma.userGroup.create({data: { userId, groupId, role }})
-    return this.findOne(groupId);
+      select: groupWithBets.select,
+    });
   }
 
   async isMemberOfGroup(userId: string, groupId: string) {
     const group = await this.findOne(groupId);
-    
+
     // Make sure group exists
     if (!group) {
       this.logger.log('Group not found', undefined, { userId, groupId });
-        return false
+      return false;
     }
 
     // Make sure user is in the group
-    const user = group.userGroups.find(ug => ug.user.id === userId);
+    const user = group.userGroups.find((ug) => ug.user.id === userId);
 
     if (!user) {
-      this.logger.log('User not member of group', undefined, { userId, groupId });
-      return false
+      this.logger.log('User not member of group', undefined, {
+        userId,
+        groupId,
+      });
+      return false;
     }
 
     return true;
