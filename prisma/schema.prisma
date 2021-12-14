@@ -42,7 +42,7 @@ model FriendRequest {
 model User {
   displayName String @map("display_name")
   email       String @unique @map("user_name")
-  score Int @default(300)
+  score Int @default(3000)
 
   password String?
 

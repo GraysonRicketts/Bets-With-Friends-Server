@@ -6,10 +6,11 @@ import { CategoryService } from './service/category/category.service';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { ScoreService } from './service/score/score.service';
 import { UserModule } from '../user/user.module';
+import { ScoreController } from './controller/score/score.controller';
 
 @Module({
   imports: [GroupModule, PrismaModule, UserModule],
-  controllers: [BetController],
+  controllers: [BetController, ScoreController],
   providers: [BetService, CategoryService, ScoreService]
 })
 export class BetModule {}

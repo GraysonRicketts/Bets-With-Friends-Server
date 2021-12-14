@@ -84,11 +84,11 @@ export type UserWithPasswordPayload = Prisma.UserGetPayload<
 export type UserWithWagerPayload = Prisma.UserGetPayload<typeof wagerUser>;
 export type UserWithFriendPayload = Prisma.UserGetPayload<typeof friendsUser>;
 
-interface FindParams {
+type FindParams = {
   email?: string;
   id?: string;
 }
-interface FindOpts {
+type FindOpts = {
   withPassword: boolean;
   withWager: boolean;
   withFriend: boolean;
