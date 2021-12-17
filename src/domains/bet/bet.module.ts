@@ -7,9 +7,10 @@ import { PrismaModule } from '../../prisma/prisma.module';
 import { ScoreService } from './service/score/score.service';
 import { UserModule } from '../user/user.module';
 import { ScoreController } from './controller/score/score.controller';
+import { OutcomeModule } from './service/bet/outcome/outcome.module';
 
 @Module({
-  imports: [GroupModule, PrismaModule, UserModule],
+  imports: [GroupModule, PrismaModule, UserModule, OutcomeModule],
   controllers: [BetController, ScoreController],
   providers: [BetService, CategoryService, ScoreService]
 })

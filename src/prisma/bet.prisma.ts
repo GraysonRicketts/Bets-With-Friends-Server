@@ -49,4 +49,4 @@ export const baseBet = Prisma.validator<Prisma.BetArgs>()({
   },
 });
 
-type BaseBet = Prisma.BetGetPayload<typeof baseBet>;
+export type BaseBet = Prisma.BetGetPayload<typeof baseBet>;

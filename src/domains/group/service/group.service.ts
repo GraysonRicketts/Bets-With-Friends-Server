@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import { PrivelegeLevel } from '@prisma/client';
 import { CustomLogger } from '../../../logger/CustomLogger';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { baseBet } from '../../bet/service/bet/bet.prisma';
+import { baseBet } from '../../../prisma/bet.prisma';
 import { baseUser } from '../../user/service/user.service';
 
 const baseGroup = Prisma.validator<Prisma.GroupArgs>()({

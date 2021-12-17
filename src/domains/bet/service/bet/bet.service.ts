@@ -1,16 +1,16 @@
-import { Category, Prisma, PrismaPromise } from '@prisma/client';
+import { Category, PrismaPromise } from '@prisma/client';
 import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CustomLogger } from '../../../../logger/CustomLogger';
-import { PrismaService } from '../../../../prisma/prisma.service';
+import { CustomLogger } from 'src/logger/CustomLogger';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { GroupService } from '../../../group/service/group.service';
 import { CategoryService } from '../category/category.service';
 import { ScoreService } from '../score/score.service';
 import { DateTime } from 'luxon';
-import { baseBet, baseWager } from './bet.prisma';
+import { baseBet, baseWager } from 'src/prisma/bet.prisma';
 
 interface CreateBetData {
   creatorId: string;
