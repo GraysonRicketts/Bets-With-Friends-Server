@@ -11,6 +11,7 @@ import { CategoryService } from '../category/category.service';
 import { ScoreService } from '../score/score.service';
 import { DateTime } from 'luxon';
 import { baseBet, baseWager } from 'src/prisma/bet.prisma';
+import { OutcomeService } from './outcome/outcome.service';
 
 interface CreateBetData {
   creatorId: string;
@@ -37,6 +38,7 @@ export class BetService {
     private readonly categoryService: CategoryService,
     private readonly scoreService: ScoreService,
     private readonly logger: CustomLogger,
+    private readonly outcomeService: OutcomeService
   ) {
     this.logger.setContext(BetService.name);
   }
@@ -140,7 +142,6 @@ export class BetService {
       throw err;
     }
 
-    await this.scoreService.canSubtractScore(creatorId, amount);
     return this.prisma.wager.create({
       data: {
         betId,
@@ -177,7 +178,8 @@ export class BetService {
     const bet = await this.getBet(betId);
 
     await this.validateIsMemberOfGroup(userId, bet.groupId);
-    if (!bet.options.find((o) => o.id === winningOptionId)) {
+    const winningOption = bet.options.find((o) => o.id === winningOptionId);
+    if (!winningOption) {
       const err = new BadRequestException();
       this.logger.error('Invalid winning option', err.stack, undefined, {
         userId,
@@ -187,66 +189,9 @@ export class BetService {
       throw err;
     }
 
-    // Find winners
-    const winningWagers = bet.wagers.filter(
-      (w) => w.option.id === winningOptionId,
-    );
-
-    // Sum pool
-    const pool = bet.wagers.map((w) => w.amount).reduce((pv, cv) => pv + cv, 0);
-    const winnersPool = winningWagers
-      .map((w) => w.amount)
-      .reduce((pv, cv) => pv + cv, 0);
-
-    // If there are winners and not everyone is a winner
-    const updates: PrismaPromise<any>[] = [];
-    if (winnersPool > 0 && winnersPool < pool) {
-      const losersPool = pool - winnersPool;
-
-      // Add score to users
-      updates.push(
-        ...winningWagers.map((w) => {
-          const poolShare = (w.amount / winnersPool) * losersPool;
-          return this.prisma.user.updateMany({
-            data: {
-              score: {
-                increment: poolShare,
-              },
-              version: {
-                increment: 1,
-              },
-            },
-            where: {
-              id: w.user.id,
-              version: w.user.version,
-            },
-          });
-        }),
-      );
-
-      // Remove score from users
-      const losingWagers = bet.wagers.filter(
-        (w) => !winningWagers.find((ww) => ww.id !== w.id),
-      );
-      updates.push(
-        ...losingWagers.map((w) => {
-          return this.prisma.user.updateMany({
-            data: {
-              score: {
-                decrement: w.amount,
-              },
-              version: {
-                increment: 1,
-              },
-            },
-            where: {
-              id: w.user.id,
-              version: w.user.version,
-            },
-          });
-        }),
-      );
-    }
+    const outcomes = this.outcomeService.calculateOutcomes(bet);
+    const scoresToUpdate = Object.entries(outcomes).filter(([_, o]) => o.delta !== 0);
+    const updates = scoresToUpdate.map(([id, o]) => this.scoreService.updateScore(id, o.delta))
 
     // Transactionalize updates and closing bet
     await this.prisma.$transaction([

@@ -61,7 +61,7 @@ describe('OutcomeService', () => {
         options: [yesOp, { ...noOp, isFinalOption: true}]
       };
 
-      const o = service.calculateOutcome(b);
+      const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(-20);
       expect(o[user2.id].delta).toEqual(-20);
@@ -82,7 +82,7 @@ describe('OutcomeService', () => {
         options: [noOp, { ...yesOp, isFinalOption: true}]
       };
       
-      const o = service.calculateOutcome(b);
+      const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(0);
       expect(o[user2.id].delta).toEqual(0);
@@ -103,7 +103,7 @@ describe('OutcomeService', () => {
         options: [noOp, { ...yesOp, isFinalOption: true}]
       };
       
-      const o = service.calculateOutcome(b);
+      const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(20);
       expect(o[user2.id].delta).toEqual(-20);
@@ -125,7 +125,7 @@ describe('OutcomeService', () => {
         options: [noOp, { ...yesOp, isFinalOption: true}]
       };
       
-      const o = service.calculateOutcome(b);
+      const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(10);
       expect(o[user2.id].delta).toEqual(10);
@@ -148,7 +148,7 @@ describe('OutcomeService', () => {
         options: [yesOp, { ...noOp, isFinalOption: true}]
       };
       
-      const o = service.calculateOutcome(b);
+      const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(-20);
       expect(o[user2.id].delta).toEqual(-20);

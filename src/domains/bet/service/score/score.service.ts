@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CustomLogger } from '../../../../logger/CustomLogger';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { UserService } from '../../../user/service/user.service';
@@ -11,28 +11,32 @@ export class ScoreService {
     private readonly logger: CustomLogger,
   ) {}
 
-  async getScore(userId) {
-    const usr = await this.userService.findUnique({id: userId});
+  async getScore(userId: string) {
+    const usr = await this.userService.findUnique({ id: userId });
     return usr?.score;
   }
 
-  async canSubtractScore(userId: string, wager: number): Promise<boolean> {
-    return true;
-    // const user = await this.userService.findUnique({ id: userId }, { withWager: true }) as UserWithWagerPayload;
-    // if (!user) {
-    //   const err = new BadRequestException();
-    //   this.logger.error('Bet does not exist', err.stack, undefined, { userId, wager });
-    //   throw err;
-    // }
+  updateScore(userId: string, amount: number) {
+    let delta;
+    if (amount === 0) {
+      this.logger.error('Updating score by 0');
+      delta = { score: { decrement: 0 } };
+    } else if (amount < 0) {
+      delta = { score: { decrement: amount } };
+    } else {
+      delta = { score: { increment: amount } };
+    }
 
-    // const { score, wager: wagers } = user;
-    // const activeWagers = wagers.filter(w => !w.bet.closedAt).map(w => w.amount).reduce((pv, cv) => pv + cv, 0)
-    // if ((score - wager - activeWagers) < 0) {
-    //     const err = new BadRequestException();
-    //   this.logger.error('Bet does not exist', err.stack, undefined, { userId, wager });
-    //   throw err;
-    // }
-
-    // return user.version;
+    return this.prisma.user.update({
+      data: {
+        ...delta,
+        version: {
+          increment: 1,
+        },
+      },
+      where: {
+        id: userId,
+      },
+    });
   }
 }

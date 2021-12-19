@@ -9,7 +9,7 @@ interface Outcome {
 
 @Injectable()
 export class OutcomeService {
-  calculateOutcome(bet: BaseBet): Record<string, Outcome> {
+  calculateOutcomes(bet: BaseBet): Record<string, Outcome> {
     const winningOption = bet.options.find((o) => o.isFinalOption);
     if (!winningOption) {
       throw new InternalServerErrorException('Expected winning option');
