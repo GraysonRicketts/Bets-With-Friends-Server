@@ -188,6 +188,7 @@ export class BetService {
       });
       throw err;
     }
+    winningOption.isFinalOption = true;
 
     const outcomes = this.outcomeService.calculateOutcomes(bet);
     const scoresToUpdate = Object.entries(outcomes).filter(([_, o]) => o.delta !== 0);

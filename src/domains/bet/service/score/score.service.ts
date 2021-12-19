@@ -16,20 +16,17 @@ export class ScoreService {
     return usr?.score;
   }
 
-  updateScore(userId: string, amount: number) {
-    let delta;
-    if (amount === 0) {
+  updateScore(userId: string, delta: number) {
+    if (delta === 0) {
       this.logger.error('Updating score by 0');
-      delta = { score: { decrement: 0 } };
-    } else if (amount < 0) {
-      delta = { score: { decrement: amount } };
-    } else {
-      delta = { score: { increment: amount } };
     }
 
     return this.prisma.user.update({
       data: {
-        ...delta,
+        score: {
+          // Increment handles negative deltas
+          increment: delta
+        },
         version: {
           increment: 1,
         },
