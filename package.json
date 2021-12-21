@@ -48,11 +48,11 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
-    "winston": "^3.3.3"
+    "winston": "^3.3.3",
+    "@nestjs/cli": "^8.0.0",
+    "@nestjs/schematics": "^8.0.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.0.0",
-    "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
     "@types/bcrypt": "^5.0.0",
     "@types/jest": "^27.0.1",
