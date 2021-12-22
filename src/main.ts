@@ -11,7 +11,7 @@ import { handleProcessorErrors } from './processError';
 import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
-import { PORT } from './env/env.constants';
+import { getPort } from './env/env.constants';
 import { fastifyHelmet } from 'fastify-helmet';
 import { ValidationPipe } from '@nestjs/common';
 
@@ -54,7 +54,7 @@ async function bootstrap() {
   // Set global router prefix
   app.setGlobalPrefix('api/v1');
 
-  await app.listen(PORT || 5000);
+  await app.listen(getPort() || 5000);
 }
 bootstrap();
 
