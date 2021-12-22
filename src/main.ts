@@ -54,9 +54,9 @@ async function bootstrap() {
   // Set global router prefix
   app.setGlobalPrefix('api/v1');
 
-  appLogger.log(`port ${getPort()}:${process.env.PORT}`)
+  appLogger.log(`port ${PORT}:${process.env.PORT}`)
 
-  await app.listen(getPort() || 5000);
+  await app.listen(PORT || 5000);
 }
 bootstrap();
 
