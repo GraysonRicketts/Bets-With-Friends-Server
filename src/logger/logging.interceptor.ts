@@ -30,16 +30,14 @@ export class LoggingInterceptor implements NestInterceptor {
 
     const traceContext = { traceId };
     ALS.enterWith(traceContext);
-    this.logger.log('REQ started', undefined, {
-      path: request.url,
-      method: request.method,
-    });
 
     const now = Date.now();
     return next.handle().pipe(
       tap(() =>
         this.logger.log('REQ end', undefined, {
           duration: Date.now() - now,
+          path: request.url,
+          method: request.method,
         }),
       ),
     );
