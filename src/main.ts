@@ -39,7 +39,7 @@ async function bootstrap() {
   const appLogger = await app.resolve(CustomLogger)
   appLogger.setContext('App')
   app.useLogger(appLogger);
-  
+
   app.useGlobalInterceptors(new LoggingInterceptor(await app.resolve(CustomLogger)));
 
   // See https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks
@@ -53,8 +53,8 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const port = PORT || 5000;
-  await app.listen(port, '0.0.0.0');
-  appLogger.log(`Listening on ${await app.getUrl()}:${port}`);
+  await app.listen(port);
+  appLogger.log(`Listening at ${await app.getUrl()}:${port}`);
 }
 bootstrap();
 
