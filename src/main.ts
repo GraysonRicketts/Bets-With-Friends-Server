@@ -23,7 +23,8 @@ async function bootstrap() {
   // Create app
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter()
+    new FastifyAdapter(),
+    // { cors: true }
   );
 
   // Swagger configuration
@@ -45,7 +46,7 @@ async function bootstrap() {
   prismaService.enableShutdownHooks(app)
 
   // Add security headers
-  await app.register(fastifyHelmet);
+  // await app.register(fastifyHelmet);
 
   // Add validation pipes for app
   app.useGlobalPipes(new ValidationPipe());
