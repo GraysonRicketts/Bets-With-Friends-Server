@@ -48,7 +48,7 @@ async function bootstrap() {
   prismaService.enableShutdownHooks(app)
 
   // Add security headers
-  // await app.register(fastifyHelmet);
+  await app.register(fastifyHelmet);
 
   // Add validation pipes for app
   app.useGlobalPipes(new ValidationPipe());
@@ -59,7 +59,7 @@ async function bootstrap() {
     url = '0.0.0.0';
   }
   await app.listen(port, url || 'localhost');
-  appLogger.log(`Listening at ${await app.getUrl()}:${port} (${url})`);
+  appLogger.log(`Listening at ${await app.getUrl()}`);
 }
 bootstrap();
 
