@@ -11,9 +11,10 @@ import { handleProcessorErrors } from './processError';
 import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
-import { PORT } from './env/env.constants';
+import { PORT, URL } from './env/env.constants';
 import { fastifyHelmet } from 'fastify-helmet';
 import { ValidationPipe } from '@nestjs/common';
+import { isProd } from './env/env.util';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 
@@ -53,8 +54,12 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const port = PORT || 5000;
-  await app.listen(port);
-  appLogger.log(`Listening at ${await app.getUrl()}:${port}`);
+  let url = URL;
+  if (!url && isProd()) {
+    url = '0.0.0.0';
+  }
+  await app.listen(port, url || 'localhost');
+  appLogger.log(`Listening at ${await app.getUrl()}:${port} (${url})`);
 }
 bootstrap();
 
