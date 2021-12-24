@@ -50,9 +50,6 @@ async function bootstrap() {
   // Add validation pipes for app
   app.useGlobalPipes(new ValidationPipe());
 
-  // Set global router prefix
-  app.setGlobalPrefix('api/v1');
-
   const port = PORT || 5000;
   await app.listen(port);
   appLogger.log(`Listening on port ${port}`);
