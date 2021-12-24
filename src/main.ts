@@ -23,8 +23,7 @@ async function bootstrap() {
   // Create app
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
-    { cors: true }
+    new FastifyAdapter()
   );
 
   // Swagger configuration
