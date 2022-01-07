@@ -1,8 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app/app.module';
 import { CustomLogger } from './logger/CustomLogger';
@@ -12,21 +9,19 @@ import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
 import { AsyncLocalStorage } from 'async_hooks';
 import { PrismaService } from './prisma/prisma.service';
 import { PORT, URL } from './env/env.constants';
-import { fastifyHelmet } from 'fastify-helmet';
 import { ValidationPipe } from '@nestjs/common';
 import { isProd } from './env/env.util';
+import helmet from 'helmet';
 
 export const ALS = new AsyncLocalStorage<TraceContext>();
 
 async function bootstrap() {
-  handleProcessorErrors(new CustomLogger())
+  handleProcessorErrors(new CustomLogger());
 
   // Create app
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    { cors: true }
-  );
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    cors: true,
+  });
 
   // Swagger configuration
   const config = new DocumentBuilder()
@@ -37,18 +32,20 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   // Implement custom logger for framework logging
-  const appLogger = await app.resolve(CustomLogger)
-  appLogger.setContext('App')
+  const appLogger = await app.resolve(CustomLogger);
+  appLogger.setContext('App');
   app.useLogger(appLogger);
 
-  app.useGlobalInterceptors(new LoggingInterceptor(await app.resolve(CustomLogger)));
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(await app.resolve(CustomLogger)),
+  );
 
   // See https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks
   const prismaService: PrismaService = app.get(PrismaService);
-  prismaService.enableShutdownHooks(app)
+  prismaService.enableShutdownHooks(app);
 
   // Add security headers
-  await app.register(fastifyHelmet);
+  await app.use(helmet());
 
   // Add validation pipes for app
   app.useGlobalPipes(new ValidationPipe());
@@ -62,4 +59,3 @@ async function bootstrap() {
   appLogger.log(`Listening at ${await app.getUrl()}`);
 }
 bootstrap();
-
