@@ -8,7 +8,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { JWT_EXPIRATION, JWT_SECRET, NODE_ENV } from '../env/env.constants';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { isProd } from '../env/env.util';
-import { GoogleStrategy } from './strategy/google.strategy';
 
 @Module({
   controllers: [AuthController],
@@ -23,6 +22,6 @@ import { GoogleStrategy } from './strategy/google.strategy';
         signOptions: { expiresIn: JWT_EXPIRATION }}
       }
   })],
-  providers: [AuthService, LocalStrategy, GoogleStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
 })
 export class AuthModule {}

@@ -94,6 +94,12 @@ type FindOpts = {
   withFriend: boolean;
 }
 
+type SimpleUser = { email: string, displayName: string};
+type CreateUser = CreateLocalUserDto | SimpleUser;
+function isLocal(user: CreateLocalUserDto | SimpleUser): user is CreateLocalUserDto {
+  return (<CreateLocalUserDto>user).password !== undefined;
+}
+
 @Injectable()
 export class UserService {
   constructor(
@@ -147,8 +153,9 @@ export class UserService {
     });
   }
 
-  create(createUserDto: CreateLocalUserDto): Promise<User> {
-    const { displayName, email, password } = createUserDto;
+  create(user: CreateUser): Promise<User> {
+    const { displayName, email } = user;
+    const password = isLocal(user) ? user.password : undefined;
     return this.prisma.user.create({ data: { displayName, email, password } });
   }
 }

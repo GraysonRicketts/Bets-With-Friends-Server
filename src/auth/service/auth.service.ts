@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   BaseUserPayload,
@@ -10,15 +11,23 @@ import {
 } from '../../domains/user/service/user.service';
 import { LoginDto } from './../dto/log-in.dto';
 import { JwtService } from '@nestjs/jwt';
-import { pbkdf2Sync, randomBytes } from 'crypto';
-import { CIPHER_SECRET } from '../../env/env.constants';
+import { pbkdf2Sync } from 'crypto';
+import { CIPHER_SECRET, GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET } from '../../env/env.constants';
+import { google } from 'googleapis';
+import { OAuth2Client } from 'googleapis-common';
 
 @Injectable()
 export class AuthService {
+  private googleAuth: OAuth2Client;
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) {
+    this.googleAuth = new google.auth.OAuth2(
+      GOOGLE_OAUTH_CLIENT_ID,
+      GOOGLE_OAUTH_CLIENT_SECRET
+    );
+  }
 
   async validateUser(loginDto: LoginDto) {
     const { email, password } = loginDto;
@@ -43,17 +52,46 @@ export class AuthService {
 
   async login(user: BaseUserPayload) {
     const { id, displayName } = user;
-    const payload = { displayName, sub: id };
+    const accessToken = this.createAccessToken(displayName, id)
 
     return {
       id,
       displayName,
-      accessToken: this.jwtService.sign(payload),
+      accessToken
     };
   }
 
-  async createAccount(displayName, email, rawPassword) {
-    const password = this.encrypt(rawPassword);
+  async loginWithGoogle(accessToken: string) {
+    // Call google and get email
+    let email: string | undefined;
+    try {
+      const tokenInfo = await this.googleAuth.getTokenInfo(accessToken);
+      email = tokenInfo.email;
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
+    if (!email) {
+      throw new InternalServerErrorException();
+    }
+
+    // If user has never logged in before then create a user record for them
+    let user = await this.userService.findUnique({email})
+    if (!user) {
+      user = await this.userService.create({ email, displayName: email })
+    }
+
+    return this.login(user);
+  }
+
+  private createAccessToken(displayName: string, id: string): string {
+    const payload = { displayName, sub: id };
+    return this.jwtService.sign(payload)
+  }
+
+  async createAccount(displayName: string, email: string, rawPassword?: string) {
+    let password: string | undefined;
+    if (rawPassword)
+    password = this.encrypt(rawPassword);
 
     const user = await this.userService.findUnique({ email });
     if (!!user) {
