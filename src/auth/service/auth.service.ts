@@ -15,6 +15,7 @@ import { pbkdf2Sync } from 'crypto';
 import { CIPHER_SECRET, GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET } from '../../env/env.constants';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'googleapis-common';
+import { CustomLogger } from '../../logger/CustomLogger';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,9 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly logger: CustomLogger
   ) {
+    this.logger.setContext('AuthService')
     this.googleAuth = new google.auth.OAuth2(
       GOOGLE_OAUTH_CLIENT_ID,
       GOOGLE_OAUTH_CLIENT_SECRET
@@ -62,12 +65,12 @@ export class AuthService {
   }
 
   async loginWithGoogle(accessToken: string) {
-    // Call google and get email
     let email: string | undefined;
     try {
       const tokenInfo = await this.googleAuth.getTokenInfo(accessToken);
       email = tokenInfo.email;
     } catch (err) {
+      this.logger.error(err);
       throw new UnauthorizedException();
     }
     if (!email) {

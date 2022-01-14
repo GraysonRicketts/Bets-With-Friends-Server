@@ -23,10 +23,10 @@ export class LoggingInterceptor implements NestInterceptor {
   }
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request: Request = context.switchToHttp().getRequest();
-    const response: Response = context.switchToHttp().getResponse();
+    // const response: Response = context.switchToHttp().getResponse();
 
     const traceId = randomUUID();
-    response.headers[HEADER_TRACE] = traceId;
+    // response.headers[HEADER_TRACE] = traceId;
 
     const traceContext = { traceId };
     ALS.enterWith(traceContext);

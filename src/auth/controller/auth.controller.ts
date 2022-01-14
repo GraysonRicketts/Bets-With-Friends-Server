@@ -16,7 +16,7 @@ export class AuthController {
 
   @Post('google')
   async loginGoogle(@Request() req) {
-    const { accessToken } = req;
+    const { accessToken } = req.body;
     return await this.authService.loginWithGoogle(accessToken);
   }
 

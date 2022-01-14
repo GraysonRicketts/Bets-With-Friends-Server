@@ -51,10 +51,13 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const port = PORT || 5000;
+
+  // Have to do custom URL stuff to get fastify to work with Heroku
   let url = URL;
   if (!url && isProd()) {
     url = '0.0.0.0';
   }
+
   await app.listen(port, url || 'localhost');
   appLogger.log(`Listening at ${await app.getUrl()}`);
 }
