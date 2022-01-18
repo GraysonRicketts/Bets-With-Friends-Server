@@ -12,6 +12,6 @@ import { OutcomeModule } from './service/bet/outcome/outcome.module';
 @Module({
   imports: [GroupModule, PrismaModule, UserModule, OutcomeModule],
   controllers: [BetController, ScoreController],
-  providers: [BetService, CategoryService, ScoreService]
+  providers: [BetService, CategoryService, ScoreService],
 })
 export class BetModule {}

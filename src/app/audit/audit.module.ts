@@ -3,6 +3,6 @@ import { AuditSubscriber } from './audit.subscriber';
 
 @Module({
   controllers: [],
-  providers: [AuditSubscriber]
+  providers: [AuditSubscriber],
 })
 export class AuditModule {}

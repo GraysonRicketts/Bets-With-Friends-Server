@@ -2,11 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CustomLogger } from '../../../../logger/CustomLogger';
 import { PrismaService } from '../../../../prisma/prisma.service';
 
-interface FindParams {
-  id?: string;
-  name?: string;
-}
-
 @Injectable()
 export class CategoryService {
   constructor(

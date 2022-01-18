@@ -9,20 +9,20 @@ import { UserService } from '../../domains/user/service/user.service';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly userService: UserService) {
     super({
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        ignoreExpiration: false,
-        secretOrKey: JWT_SECRET,
-      });
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: JWT_SECRET,
+    });
   }
 
   async validate(payload) {
-      const id = payload.sub;
-      const user = await this.userService.findUnique({ id });
+    const id = payload.sub;
+    const user = await this.userService.findUnique({ id });
 
-      if (!user) {
-        throw new UnauthorizedException();
-      }
+    if (!user) {
+      throw new UnauthorizedException();
+    }
 
-      return user;
+    return user;
   }
 }

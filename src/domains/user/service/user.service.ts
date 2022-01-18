@@ -47,10 +47,10 @@ const friendsUser = Prisma.validator<Prisma.UserArgs>()({
           select: {
             id: true,
             email: true,
-            score: true
-          } 
-        }
-      }
+            score: true,
+          },
+        },
+      },
     },
     sentFriendRequests: {
       select: {
@@ -58,10 +58,10 @@ const friendsUser = Prisma.validator<Prisma.UserArgs>()({
         userTo: {
           select: {
             id: true,
-            email: true
-          } 
-        }
-      }
+            email: true,
+          },
+        },
+      },
     },
     receivedFriendRequests: {
       select: {
@@ -69,13 +69,13 @@ const friendsUser = Prisma.validator<Prisma.UserArgs>()({
         userFrom: {
           select: {
             id: true,
-            email: true
-          } 
-        }
-      }
-    }
-  }
-})
+            email: true,
+          },
+        },
+      },
+    },
+  },
+});
 
 export type BaseUserPayload = Prisma.UserGetPayload<typeof baseUser>;
 export type UserWithPasswordPayload = Prisma.UserGetPayload<
@@ -87,16 +87,18 @@ export type UserWithFriendPayload = Prisma.UserGetPayload<typeof friendsUser>;
 type FindParams = {
   email?: string;
   id?: string;
-}
+};
 type FindOpts = {
   withPassword: boolean;
   withWager: boolean;
   withFriend: boolean;
-}
+};
 
-type SimpleUser = { email: string, displayName: string};
+type SimpleUser = { email: string; displayName: string };
 type CreateUser = CreateLocalUserDto | SimpleUser;
-function isLocal(user: CreateLocalUserDto | SimpleUser): user is CreateLocalUserDto {
+function isLocal(
+  user: CreateLocalUserDto | SimpleUser,
+): user is CreateLocalUserDto {
   return (<CreateLocalUserDto>user).password !== undefined;
 }
 
@@ -136,16 +138,16 @@ export class UserService {
     const { withPassword: wp, withWager: ww, withFriend: wf } = opts;
 
     let select = {
-      ...baseUser.select
+      ...baseUser.select,
     };
     if (wp) {
-      select = {...select, ...passwordUser.select}
+      select = { ...select, ...passwordUser.select };
     }
     if (ww) {
-      select = { ...select, ...wagerUser.select}
+      select = { ...select, ...wagerUser.select };
     }
     if (wf) {
-      select = { ...select, ...friendsUser.select}
+      select = { ...select, ...friendsUser.select };
     }
     return this.prisma.user.findUnique({
       select,

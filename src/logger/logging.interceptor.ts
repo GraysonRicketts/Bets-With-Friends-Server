@@ -7,7 +7,6 @@ import {
 import { Observable, tap } from 'rxjs';
 import { CustomLogger } from './CustomLogger';
 import { randomUUID } from 'crypto';
-import { AsyncLocalStorage } from 'async_hooks';
 import { ALS } from '../main';
 
 export const HEADER_TRACE = 'x-bfw-trace-id';

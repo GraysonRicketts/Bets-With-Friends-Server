@@ -38,7 +38,7 @@ export class BetService {
     private readonly categoryService: CategoryService,
     private readonly scoreService: ScoreService,
     private readonly logger: CustomLogger,
-    private readonly outcomeService: OutcomeService
+    private readonly outcomeService: OutcomeService,
   ) {
     this.logger.setContext(BetService.name);
   }
@@ -163,8 +163,8 @@ export class BetService {
       where: {
         AND: {
           groupId,
-          deletedAt: null
-        }
+          deletedAt: null,
+        },
       },
     });
   }
@@ -191,8 +191,12 @@ export class BetService {
     winningOption.isFinalOption = true;
 
     const outcomes = this.outcomeService.calculateOutcomes(bet);
-    const scoresToUpdate = Object.entries(outcomes).filter(([_, o]) => o.delta !== 0);
-    const updates = scoresToUpdate.map(([id, o]) => this.scoreService.updateScore(id, o.delta))
+    const scoresToUpdate = Object.entries(outcomes).filter(
+      (os) => os[1].delta !== 0,
+    );
+    const updates = scoresToUpdate.map(([id, o]) =>
+      this.scoreService.updateScore(id, o.delta),
+    );
 
     // Transactionalize updates and closing bet
     await this.prisma.$transaction([
@@ -272,7 +276,7 @@ export class BetService {
     await this.prisma.$transaction([
       this.prisma.bet.update({
         data: {
-          deletedAt: nowIso
+          deletedAt: nowIso,
         },
         where: {
           id,
@@ -280,7 +284,7 @@ export class BetService {
       }),
       this.prisma.wager.updateMany({
         data: {
-          deletedAt: nowIso
+          deletedAt: nowIso,
         },
         where: {
           betId: id,
@@ -288,12 +292,12 @@ export class BetService {
       }),
       this.prisma.option.updateMany({
         data: {
-          deletedAt: nowIso
+          deletedAt: nowIso,
         },
         where: {
           betId: id,
         },
-      })
-    ])
+      }),
+    ]);
   }
 }

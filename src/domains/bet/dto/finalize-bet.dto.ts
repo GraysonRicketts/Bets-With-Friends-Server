@@ -1,9 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class FinalizeBetDto {
-    @ApiProperty({ required: true})
-    betId: string;
+  @ApiProperty({ required: true })
+  betId: string;
 
-    @ApiProperty({ required: true})
-    winningOptionId: string;
+  @ApiProperty({ required: true })
+  winningOptionId: string;
 }

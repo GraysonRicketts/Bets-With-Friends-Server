@@ -1,38 +1,47 @@
-import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { CustomLogger } from '../../../../logger/CustomLogger';
 import { PrismaService } from '../../../../prisma/prisma.service';
-import { UserService, UserWithFriendPayload, baseUser } from '../../service/user.service';
+import {
+  UserService,
+  UserWithFriendPayload,
+  baseUser,
+} from '../../service/user.service';
 
 export const baseFriendRequest = Prisma.validator<Prisma.FriendRequestArgs>()({
   select: {
     id: true,
     userTo: {
       select: {
-        ...baseUser.select
-      }
+        ...baseUser.select,
+      },
     },
     userFrom: {
       select: {
-        ...baseUser.select
-      }
+        ...baseUser.select,
+      },
     },
-    createdAt: true
-  }
+    createdAt: true,
+  },
 });
-export type FriendRequest = Prisma.FriendRequestGetPayload<typeof baseFriendRequest>;
+export type FriendRequest = Prisma.FriendRequestGetPayload<
+  typeof baseFriendRequest
+>;
 
 export const baseFriend = Prisma.validator<Prisma.FriendArgs>()({
   select: {
     id: true,
     friend: {
-      select: { ...baseUser.select }
-    }
-  }
+      select: { ...baseUser.select },
+    },
+  },
 });
 
-
-export type FriendPayload = Prisma.FriendGetPayload<typeof baseFriend>
+export type FriendPayload = Prisma.FriendGetPayload<typeof baseFriend>;
 
 export interface FriendRequests {
   to: FriendRequest[];
@@ -45,31 +54,26 @@ export class FriendService {
     const requests = await this.prisma.friendRequest.findMany({
       ...baseFriendRequest,
       where: {
-        OR: [
-          {userFromId: userId} ,
-          {userToId: userId} ,
+        OR: [{ userFromId: userId }, { userToId: userId }],
+      },
+    });
 
-        ]
-      }
-    })
-
-    const from = requests.filter(r => r.userFrom.id === userId);
-    const to = requests.filter(r => r.userTo.id === userId);
+    const from = requests.filter((r) => r.userFrom.id === userId);
+    const to = requests.filter((r) => r.userTo.id === userId);
 
     return {
       from,
-      to
-    }
+      to,
+    };
   }
 
   getFriendsForUser(userId: string) {
     return this.prisma.friend.findMany({
-      ...baseFriend
-      ,
+      ...baseFriend,
       where: {
-        friendedId: userId
-      }
-    })
+        friendedId: userId,
+      },
+    });
   }
 
   constructor(
@@ -101,7 +105,9 @@ export class FriendService {
       { withFriend: true },
     )) as UserWithFriendPayload;
     if (!friend) {
-      const err = new BadRequestException('Your friend does not have an account linked to this email');
+      const err = new BadRequestException(
+        'Your friend does not have an account linked to this email',
+      );
       this.logger.error('Friend does not exist', err.stack, undefined, {
         friendEmail,
         userId,
@@ -157,42 +163,49 @@ export class FriendService {
   async removeFriend(friendId: string, userId: string) {
     // Validate user exists
     const user = (await this.userService.findUnique(
-        { id: userId },
-        { withFriend: true },
-      )) as UserWithFriendPayload;
-      if (!user) {
-        const err = new BadRequestException();
-        this.logger.error('User does not exist', err.stack, undefined, {
-            friendId,
-          userId,
-        });
-        throw err;
-      }
-  
-      // Validate user and friend are already friends
-      const userFriend = user.friends.find(f => f.friend.id === friendId)
-      if (!userFriend) {
-        const err = new BadRequestException();
-        this.logger.error('Users not friends', err.stack, undefined, {
-            friendId,
-          userId,
-        });
-        throw err;
-      }
-
-      const friend = await this.userService.findUnique({ id: friendId }, { withFriend: true}) as UserWithFriendPayload;
-      const friendFriend = friend.friends.find(f => f.friend.email === user.email)
-    if (!friendFriend) {
-        throw new InternalServerErrorException('This should never be possible')
+      { id: userId },
+      { withFriend: true },
+    )) as UserWithFriendPayload;
+    if (!user) {
+      const err = new BadRequestException();
+      this.logger.error('User does not exist', err.stack, undefined, {
+        friendId,
+        userId,
+      });
+      throw err;
     }
-    
+
+    // Validate user and friend are already friends
+    const userFriend = user.friends.find((f) => f.friend.id === friendId);
+    if (!userFriend) {
+      const err = new BadRequestException();
+      this.logger.error('Users not friends', err.stack, undefined, {
+        friendId,
+        userId,
+      });
+      throw err;
+    }
+
+    const friend = (await this.userService.findUnique(
+      { id: friendId },
+      { withFriend: true },
+    )) as UserWithFriendPayload;
+    const friendFriend = friend.friends.find(
+      (f) => f.friend.email === user.email,
+    );
+    if (!friendFriend) {
+      throw new InternalServerErrorException('This should never be possible');
+    }
+
     // Remove friend
-    return this.prisma.friend.deleteMany({ where: {
+    return this.prisma.friend.deleteMany({
+      where: {
         id: friendFriend.friend.id,
         OR: {
-            id: userFriend.friend.id
-        } 
-    }})
+          id: userFriend.friend.id,
+        },
+      },
+    });
   }
 
   async acceptFriendRequest(requestId: string, userId: string) {
@@ -223,11 +236,13 @@ export class FriendService {
 
     // Delete request and add as friends
     return this.prisma.$transaction([
-        this.prisma.friendRequest.delete({ where: { id: requestId }}),
-        this.prisma.friend.createMany({ data: [
-            { friendId: userId, friendedId: request.userFrom.id },
-            { friendedId: userId, friendId: request.userFrom.id },
-        ]})
-    ])
+      this.prisma.friendRequest.delete({ where: { id: requestId } }),
+      this.prisma.friend.createMany({
+        data: [
+          { friendId: userId, friendedId: request.userFrom.id },
+          { friendedId: userId, friendId: request.userFrom.id },
+        ],
+      }),
+    ]);
   }
 }

@@ -9,7 +9,6 @@ export class AuditSubscriber {
   // ) {
   //   this.connection.subscribers.push(this);
   // }
-
   // /**
   //  * Called after entity insertion.
   //  */
@@ -17,10 +16,8 @@ export class AuditSubscriber {
   //   if (event.metadata.name === 'Audit') {
   //     return;
   //   }
-
   //   this.auditRepository.save({ diff: event.entity });
   // }
-
   // /**
   //  * Called after entity update.
   //  */
@@ -28,7 +25,6 @@ export class AuditSubscriber {
   //   if (event.metadata.name === 'Audit') {
   //     return;
   //   }
-
   //   const originalObj = event.databaseEntity;
   //   const newObj = event.entity;
   //   this.auditRepository.save({
@@ -36,7 +32,6 @@ export class AuditSubscriber {
   //     diff: diff(originalObj, newObj),
   //   });
   // }
-
   // /**
   //  * Called after entity removal.
   //  */
@@ -44,7 +39,6 @@ export class AuditSubscriber {
   //   if (event.metadata.name === 'Audit') {
   //     return;
   //   }
-
   //   this.auditRepository.save({ before: event.entity });
   // }
 }

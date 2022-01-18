@@ -78,8 +78,8 @@ export class GroupService {
       throw new BadRequestException('Group does not exist');
     }
 
-    const userIntersection = grp.userGroups.filter(
-      (ug) => newMembers.find((nm) => nm === ug.user.id),
+    const userIntersection = grp.userGroups.filter((ug) =>
+      newMembers.find((nm) => nm === ug.user.id),
     );
     if (userIntersection.length) {
       throw new BadRequestException(

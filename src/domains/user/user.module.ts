@@ -8,6 +8,6 @@ import { FriendController } from './friend/controller/friend.controller';
   imports: [PrismaModule],
   providers: [UserService, FriendService],
   exports: [UserService],
-  controllers: [FriendController]
+  controllers: [FriendController],
 })
 export class UserModule {}
