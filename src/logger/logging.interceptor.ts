@@ -7,7 +7,7 @@ import {
 import { Observable, tap } from 'rxjs';
 import { CustomLogger } from './CustomLogger';
 import { randomUUID } from 'crypto';
-import { ALS } from '../main';
+import { ALS } from 'src/app/async.context';
 
 export const HEADER_TRACE = 'x-bfw-trace-id';
 
@@ -27,8 +27,8 @@ export class LoggingInterceptor implements NestInterceptor {
     const traceId = randomUUID();
     // response.headers[HEADER_TRACE] = traceId;
 
-    const traceContext = { traceId };
-    ALS.enterWith(traceContext);
+    const aysncContext = { traceId };
+    ALS.enterWith(aysncContext);
 
     const now = Date.now();
     return next.handle().pipe(

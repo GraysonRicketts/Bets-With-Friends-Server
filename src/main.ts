@@ -5,15 +5,14 @@ import { AppModule } from './app/app.module';
 import { CustomLogger } from './logger/CustomLogger';
 import {} from 'dotenv/config';
 import { handleProcessorErrors } from './processError';
-import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
-import { AsyncLocalStorage } from 'async_hooks';
+import { LoggingInterceptor } from './logger/logging.interceptor';
 import { PrismaService } from './prisma/prisma.service';
 import { PORT, URL } from './env/env.constants';
 import { ValidationPipe } from '@nestjs/common';
 import { isProd } from './env/env.util';
 import helmet from 'helmet';
 
-export const ALS = new AsyncLocalStorage<TraceContext>();
+
 
 async function bootstrap() {
   handleProcessorErrors(new CustomLogger());

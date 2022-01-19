@@ -178,8 +178,9 @@ model Wager {
 model Audit {
   id        String   @id @default(dbgenerated("gen_random_uuid ()"))
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  before    Json?
-  diff      Json?
+  action    Json?
+  data      Json?
+  target_id String?
   userId  String? @map("user_id")
   traceId String? @map("trace_id")
 
