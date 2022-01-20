@@ -2,12 +2,17 @@ import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { DateTime } from 'luxon';
 import { ALS } from 'src/app/async.context';
+import { AUDIT_ENDABLED } from '../env/env.constants';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
     this.$use(this.softDeleteMiddleware);
+
+    if (AUDIT_ENDABLED) {
+      this.$use(this.auditMiddleware);
+    }
   }
 
   async enableShutdownHooks(app: INestApplication) {
@@ -24,19 +29,19 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     /* SOFT DELETE */
     /***********************************/
     // Check incoming query type
-    if (params.action === 'delete') {
+    if (params.action == 'delete') {
       // Delete queries
       // Change action to an update
       params.action = 'update';
-      params.args['data'] = { deletedAt: DateTime.now() };
+      params.args['data'] = { deletedAt: DateTime.now().toISO() };
     }
     if (params.action == 'deleteMany') {
       // Delete many queries
       params.action = 'updateMany';
       if (params.args.data != undefined) {
-        params.args.data['deletedAt'] = DateTime.now();
+        params.args.data['deletedAt'] = DateTime.now().toISO();
       } else {
-        params.args['data'] = { deletedAt: DateTime.now() };
+        params.args['data'] = { deletedAt: DateTime.now().toISO() };
       }
     }
 
@@ -115,20 +120,21 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
       case 'count':
         return result;
       case 'create':
+      case 'update':
+      case 'upsert':
         auditData.data = params.args.data;
         auditData.targetId = result.id;
+        await this.audit.create({ data: auditData });
         break;
       case 'createMany':
+      case 'updateMany':
+        break;
       case 'delete':
         auditData.targetId = params.args.where.id;
+        await this.audit.create({ data: auditData });
         break;
-      case 'update':
-      case 'updateMany':
-      case 'upsert':
-      case 'delete':
       case 'deleteMany':
+        break;
     }
-
-    await this.audit.create({ data: auditData });
   }
 }
