@@ -1,18 +1,17 @@
 import { INestApplication, Injectable, OnModuleInit } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { DateTime } from 'luxon';
-import { ALS } from 'src/app/async.context';
-import { AUDIT_ENDABLED } from '../env/env.constants';
+import { CustomLogger } from '../logger/CustomLogger';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
+  constructor(private readonly logger: CustomLogger) {
+    super();
+  }
+
   async onModuleInit() {
     await this.$connect();
     this.$use(this.softDeleteMiddleware);
-
-    if (AUDIT_ENDABLED) {
-      this.$use(this.auditMiddleware);
-    }
   }
 
   async enableShutdownHooks(app: INestApplication) {
@@ -85,56 +84,5 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     }
 
     return next(params);
-  }
-
-  private async auditMiddleware(
-    params: Prisma.MiddlewareParams,
-    next: (params: Prisma.MiddlewareParams) => Promise<any>,
-  ) {
-    // Don't audit the audit
-    if (params.model === 'Audit') {
-      return next(params);
-    }
-
-    const result = await next(params);
-
-    const context = ALS.getStore();
-    const contextData = {
-      traceId: context?.traceId,
-      userId: context?.user?.userId,
-    };
-
-    let auditData = {
-      data: {},
-      action: params.action,
-      targetId: '',
-      ...contextData,
-    };
-    switch (params.action) {
-      case 'executeRaw':
-      case 'findFirst':
-      case 'findMany':
-      case 'findUnique':
-      case 'queryRaw':
-      case 'aggregate':
-      case 'count':
-        return result;
-      case 'create':
-      case 'update':
-      case 'upsert':
-        auditData.data = params.args.data;
-        auditData.targetId = result.id;
-        await this.audit.create({ data: auditData });
-        break;
-      case 'createMany':
-      case 'updateMany':
-        break;
-      case 'delete':
-        auditData.targetId = params.args.where.id;
-        await this.audit.create({ data: auditData });
-        break;
-      case 'deleteMany':
-        break;
-    }
   }
 }
