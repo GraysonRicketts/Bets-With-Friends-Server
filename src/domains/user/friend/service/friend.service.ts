@@ -208,6 +208,36 @@ export class FriendService {
     });
   }
 
+  async removeFriendRequest(requestId: string, userId: string) {
+    // Validate user exists
+    const user = (await this.userService.findUnique(
+      { id: userId },
+      { withFriend: true },
+    )) as UserWithFriendPayload;
+    if (!user) {
+      const err = new BadRequestException();
+      this.logger.error('User does not exist', err.stack, undefined, {
+        requestId,
+        userId,
+      });
+      throw err;
+    }
+
+    const req = await this.prisma.friendRequest.findUnique({
+      where: { id: requestId },
+    });
+    if (!req || req.userFromId || req.userToId) {
+      const err = new BadRequestException();
+      this.logger.error('Req is not owned by the user', err.stack, undefined, {
+        requestId,
+        userId,
+      });
+      throw err;
+    }
+
+    await this.prisma.friendRequest.delete({ where: { id: requestId } });
+  }
+
   async acceptFriendRequest(requestId: string, userId: string) {
     // Validate user exists
     const user = (await this.userService.findUnique(

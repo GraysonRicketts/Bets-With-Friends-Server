@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Request,
   UseGuards,
@@ -45,5 +47,18 @@ export class FriendController {
     const user = req.user;
 
     return await this.friendService.getFriendRequestsForUser(user.id);
+  }
+
+  @Delete('/request/:id')
+  async removeFriendRequest(@Request() req, @Param('id') id) {
+    const user = req.user;
+
+    return await this.friendService.removeFriendRequest(id, user.id);
+  }
+
+  @Delete('/:id')
+  async removeFriend(@Request() req, @Param('id') id) {
+    const user = req.user;
+    return await this.friendService.removeFriend(id, user.id);
   }
 }
