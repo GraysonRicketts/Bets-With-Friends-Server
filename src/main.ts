@@ -12,8 +12,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { isProd } from './env/env.util';
 import helmet from 'helmet';
 
-
-
 async function bootstrap() {
   handleProcessorErrors(new CustomLogger());
 

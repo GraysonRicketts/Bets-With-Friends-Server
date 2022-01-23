@@ -176,8 +176,13 @@ export class FriendService {
     }
 
     // Validate user and friend are already friends
-    const userFriend = user.friends.find((f) => f.friend.id === friendId);
-    if (!userFriend) {
+    const friendRec = await this.prisma.friend.findUnique({
+      where: { id: friendId },
+    });
+    const userFriend = user.friends.find(
+      (f) => f.friend.id === friendRec?.friendedId,
+    );
+    if (!friendRec || !userFriend) {
       const err = new BadRequestException();
       this.logger.error('Users not friends', err.stack, undefined, {
         friendId,
@@ -186,24 +191,10 @@ export class FriendService {
       throw err;
     }
 
-    const friend = (await this.userService.findUnique(
-      { id: friendId },
-      { withFriend: true },
-    )) as UserWithFriendPayload;
-    const friendFriend = friend.friends.find(
-      (f) => f.friend.email === user.email,
-    );
-    if (!friendFriend) {
-      throw new InternalServerErrorException('This should never be possible');
-    }
-
     // Remove friend
-    return this.prisma.friend.deleteMany({
+    return this.prisma.friend.delete({
       where: {
-        id: friendFriend.friend.id,
-        OR: {
-          id: userFriend.friend.id,
-        },
+        id: friendRec?.id,
       },
     });
   }
