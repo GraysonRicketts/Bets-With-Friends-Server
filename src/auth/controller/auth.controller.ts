@@ -4,7 +4,6 @@ import {
   Post,
   UseGuards,
   Body,
-  Get,
 } from '@nestjs/common';
 import { CreateLocalUserDto } from '../dto/create-user.dto';
 import { LocalAuthGuard } from '../guard/local-auth.guard';

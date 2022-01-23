@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { CustomLogger } from '../../../../logger/CustomLogger';
@@ -176,8 +175,13 @@ export class FriendService {
     }
 
     // Validate user and friend are already friends
-    const userFriend = user.friends.find((f) => f.friend.id === friendId);
-    if (!userFriend) {
+    const friendRec = await this.prisma.friend.findUnique({
+      where: { id: friendId },
+    });
+    const userFriend = user.friends.find(
+      (f) => f.friend.id === friendRec?.friendedId,
+    );
+    if (!friendRec || !userFriend) {
       const err = new BadRequestException();
       this.logger.error('Users not friends', err.stack, undefined, {
         friendId,
@@ -186,26 +190,42 @@ export class FriendService {
       throw err;
     }
 
-    const friend = (await this.userService.findUnique(
-      { id: friendId },
-      { withFriend: true },
-    )) as UserWithFriendPayload;
-    const friendFriend = friend.friends.find(
-      (f) => f.friend.email === user.email,
-    );
-    if (!friendFriend) {
-      throw new InternalServerErrorException('This should never be possible');
-    }
-
     // Remove friend
-    return this.prisma.friend.deleteMany({
+    return this.prisma.friend.delete({
       where: {
-        id: friendFriend.friend.id,
-        OR: {
-          id: userFriend.friend.id,
-        },
+        id: friendRec?.id,
       },
     });
+  }
+
+  async removeFriendRequest(requestId: string, userId: string) {
+    // Validate user exists
+    const user = (await this.userService.findUnique(
+      { id: userId },
+      { withFriend: true },
+    )) as UserWithFriendPayload;
+    if (!user) {
+      const err = new BadRequestException();
+      this.logger.error('User does not exist', err.stack, undefined, {
+        requestId,
+        userId,
+      });
+      throw err;
+    }
+
+    const req = await this.prisma.friendRequest.findUnique({
+      where: { id: requestId },
+    });
+    if (!req || req.userFromId || req.userToId) {
+      const err = new BadRequestException();
+      this.logger.error('Req is not owned by the user', err.stack, undefined, {
+        requestId,
+        userId,
+      });
+      throw err;
+    }
+
+    await this.prisma.friendRequest.delete({ where: { id: requestId } });
   }
 
   async acceptFriendRequest(requestId: string, userId: string) {

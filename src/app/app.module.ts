@@ -8,13 +8,7 @@ import { AuthModule } from '../auth/auth.module';
 import { BetModule } from '../domains/bet/bet.module';
 
 @Module({
-  imports: [
-    LoggerModule,
-    UserModule,
-    GroupModule,
-    BetModule,
-    AuthModule,
-  ],
+  imports: [LoggerModule, UserModule, GroupModule, BetModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
