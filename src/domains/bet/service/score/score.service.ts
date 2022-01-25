@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CustomLogger } from '../../../../logger/CustomLogger';
 import { PrismaService } from '../../../../prisma/prisma.service';
 import { UserService } from '../../../user/service/user.service';
@@ -25,7 +25,7 @@ export class ScoreService {
       data: {
         score: {
           // Increment handles negative deltas
-          increment: delta
+          increment: delta,
         },
         version: {
           increment: 1,

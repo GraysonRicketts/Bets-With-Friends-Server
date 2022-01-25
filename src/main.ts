@@ -5,15 +5,12 @@ import { AppModule } from './app/app.module';
 import { CustomLogger } from './logger/CustomLogger';
 import {} from 'dotenv/config';
 import { handleProcessorErrors } from './processError';
-import { LoggingInterceptor, TraceContext } from './logger/logging.interceptor';
-import { AsyncLocalStorage } from 'async_hooks';
+import { LoggingInterceptor } from './logger/logging.interceptor';
 import { PrismaService } from './prisma/prisma.service';
-import { PORT, URL } from './env/env.constants';
 import { ValidationPipe } from '@nestjs/common';
-import { isProd } from './env/env.util';
+import { isProd } from 'src/config.util';
 import helmet from 'helmet';
-
-export const ALS = new AsyncLocalStorage<TraceContext>();
+import config from 'config';
 
 async function bootstrap() {
   handleProcessorErrors(new CustomLogger());
@@ -24,11 +21,11 @@ async function bootstrap() {
   });
 
   // Swagger configuration
-  const config = new DocumentBuilder()
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('Bets with friends')
     .setVersion('1.0')
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
   // Implement custom logger for framework logging
@@ -50,10 +47,10 @@ async function bootstrap() {
   // Add validation pipes for app
   app.useGlobalPipes(new ValidationPipe());
 
-  const port = PORT || 5000;
+  const port = config.get('app.port');
 
   // Have to do custom URL stuff to get fastify to work with Heroku
-  let url = URL;
+  let url = config.get('app.url');
   if (!url && isProd()) {
     url = '0.0.0.0';
   }

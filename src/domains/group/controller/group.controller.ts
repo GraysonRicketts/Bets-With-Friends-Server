@@ -7,11 +7,11 @@ import {
   UseGuards,
   ForbiddenException,
   Param,
-  NotFoundException
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../auth/guard/jwt-auth.guard';
 import { AddMemberDto } from '../dto/add-member.dto';
-import { CreateGroupDto, } from '../dto/create-group.dto';
+import { CreateGroupDto } from '../dto/create-group.dto';
 import { GroupService } from '../service/group.service';
 
 @UseGuards(JwtAuthGuard)
@@ -21,7 +21,7 @@ export class GroupController {
 
   @Post()
   create(@Body() createGroupDto: CreateGroupDto, @Request() req) {
-    const { name, members} = createGroupDto;
+    const { name, members } = createGroupDto;
     const currentUserId = req.user.id;
 
     return this.groupsService.create(name, currentUserId, members);
@@ -32,7 +32,10 @@ export class GroupController {
     const { groupId, members } = addMemberDto;
     const currentUserId = req.user.id;
 
-    const isMember = await this.groupsService.isMemberOfGroup(currentUserId, groupId);
+    const isMember = await this.groupsService.isMemberOfGroup(
+      currentUserId,
+      groupId,
+    );
     if (!isMember) {
       throw new ForbiddenException();
     }
@@ -57,4 +60,3 @@ export class GroupController {
     return group;
   }
 }
-

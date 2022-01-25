@@ -36,5 +36,8 @@ $ yarn run test:e2e
 # test coverage
 $ yarn run test:cov
 ```
-
+## Migrations
+```bash
+yarn prisma migrate dev --name <name>
+```
 

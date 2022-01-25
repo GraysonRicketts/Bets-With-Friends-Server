@@ -22,12 +22,12 @@ const user3 = {
 const yesOp = {
   id: '1',
   name: 'yes',
-  isFinalOption: false
+  isFinalOption: false,
 };
 const noOp = {
   id: '2',
   name: 'no',
-  isFinalOption: false
+  isFinalOption: false,
 };
 
 describe('OutcomeService', () => {
@@ -58,7 +58,7 @@ describe('OutcomeService', () => {
           },
           { id: 'y2', amount: 20, option: yesOp, user: user2 },
         ],
-        options: [yesOp, { ...noOp, isFinalOption: true}]
+        options: [yesOp, { ...noOp, isFinalOption: true }],
       };
 
       const o = service.calculateOutcomes(b);
@@ -79,9 +79,9 @@ describe('OutcomeService', () => {
           },
           { id: 'y2', amount: 20, option: yesOp, user: user2 },
         ],
-        options: [noOp, { ...yesOp, isFinalOption: true}]
+        options: [noOp, { ...yesOp, isFinalOption: true }],
       };
-      
+
       const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(0);
@@ -100,9 +100,9 @@ describe('OutcomeService', () => {
           },
           { id: 'y2', amount: 20, option: noOp, user: user2 },
         ],
-        options: [noOp, { ...yesOp, isFinalOption: true}]
+        options: [noOp, { ...yesOp, isFinalOption: true }],
       };
-      
+
       const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(20);
@@ -122,9 +122,9 @@ describe('OutcomeService', () => {
           { id: 'y2', amount: 20, option: yesOp, user: user2 },
           { id: 'y3', amount: 20, option: noOp, user: user3 },
         ],
-        options: [noOp, { ...yesOp, isFinalOption: true}]
+        options: [noOp, { ...yesOp, isFinalOption: true }],
       };
-      
+
       const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(10);
@@ -145,9 +145,9 @@ describe('OutcomeService', () => {
           { id: 'y2', amount: 20, option: yesOp, user: user2 },
           { id: 'y3', amount: 20, option: noOp, user: user3 },
         ],
-        options: [yesOp, { ...noOp, isFinalOption: true}]
+        options: [yesOp, { ...noOp, isFinalOption: true }],
       };
-      
+
       const o = service.calculateOutcomes(b);
 
       expect(o[user1.id].delta).toEqual(-20);

@@ -1,5 +1,4 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { Option } from '@prisma/client';
 import { BaseBet } from 'src/prisma/bet.prisma';
 
 interface Outcome {

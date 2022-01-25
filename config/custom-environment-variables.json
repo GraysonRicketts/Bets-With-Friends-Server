@@ -1,0 +1,25 @@
+{
+    "app": {
+        "port": "PORT",
+        "url": "URL",
+        "nodeEnv": "NODE_ENV"
+    },
+    "db": {
+        "url": "DATABASE_URL"
+    },
+    "auth": {
+        "cipher": {
+            "secret": "CIPHER_SECRET"
+        },
+        "jwt": {
+            "secret": "JWT_SECRET",
+            "expiration": "JWT_EXPIRATION"
+        },
+        "oauth": {
+            "google": {
+                "clientId": "GOOGLE_OAUTH_CLIENT_ID",
+                "clientSecret": "GOOGLE_OAUTH_CLIENT_SECRET"
+            }
+        }
+    }
+}

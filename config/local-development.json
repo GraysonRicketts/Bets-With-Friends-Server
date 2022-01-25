@@ -1,0 +1,22 @@
+{
+    "app": {
+        "port": "5000",
+        "url": "localhost",
+        "nodeEnv": "development"
+    },
+    "auth": {
+        "cipher": {
+            "secret": "m|S|x06������Ơ�o�ĉg�G�F��ih��Ԕ'�"
+        },
+        "jwt": {
+            "secret": "lolololol",
+            "expiration": null
+        },
+        "oauth": {
+            "google": {
+                "clientId": "513098205800-j6pp1actb46n8ae9iaahutmiba08ubna.apps.googleusercontent.com",
+                "callback": "http://localhost:5000/google/oauth2redirect"
+            }
+        }
+    }
+}

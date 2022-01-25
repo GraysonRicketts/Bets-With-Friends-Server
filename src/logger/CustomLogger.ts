@@ -1,8 +1,7 @@
 import { Injectable, Scope, ConsoleLogger } from '@nestjs/common';
 import winston, { createLogger, format, transports } from 'winston';
-import { NODE_ENV } from '../env/env.constants';
-import { isProd } from '../env/env.util';
-import { ALS } from '../main';
+import { isProd } from '../config.util';
+import { ALS } from 'src/app/async.context';
 
 const levels = {
   fatal: 0,
@@ -41,22 +40,22 @@ export class CustomLogger extends ConsoleLogger {
 
     if (!isProd()) {
       const devFormat = format.printf((info) => {
-        const { level, service, message, ...context } = info;
+        const { service, message, ...context } = info;
         delete context.timestamp;
-        
+
         let logMessage = `${
           info.level
         } | ${dateFormat()} | ${service} | ${message} ${
           Object.keys(context).length && `\n${JSON.stringify(context)}`
         }`;
-        
+
         if (info.level === 'error' || info.level === 'fatal') {
-          logMessage += `\n${info.stack}`; 
+          logMessage += `\n${info.stack}`;
         }
 
         const colorLevel = info.level === 'fatal' ? 'error' : info.level;
 
-        let colorizedMessage = format
+        const colorizedMessage = format
           .colorize()
           .colorize(colorLevel, logMessage);
         return colorizedMessage;
@@ -105,10 +104,12 @@ export class CustomLogger extends ConsoleLogger {
   }
 
   log(message: any, context?: string, children?: LogContext): void {
-    const _context = context || this._service; 
-    
+    const _context = context || this._service;
+
     const traceContext = ALS.getStore();
 
-    this._logger.child({ ...children, service: _context, ...traceContext }).info(message);
+    this._logger
+      .child({ ...children, service: _context, ...traceContext })
+      .info(message);
   }
 }
