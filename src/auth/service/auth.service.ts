@@ -12,28 +12,36 @@ import {
 import { LoginDto } from './../dto/log-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { pbkdf2Sync } from 'crypto';
-import {
-  CIPHER_SECRET,
-  GOOGLE_OAUTH_CLIENT_ID,
-  GOOGLE_OAUTH_CLIENT_SECRET,
-} from '../../env/env.constants';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'googleapis-common';
 import { CustomLogger } from '../../logger/CustomLogger';
+import config from 'config';
 
 @Injectable()
 export class AuthService {
   private googleAuth: OAuth2Client;
+  private readonly cipher: string;
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly logger: CustomLogger,
   ) {
     this.logger.setContext('AuthService');
-    this.googleAuth = new google.auth.OAuth2(
-      GOOGLE_OAUTH_CLIENT_ID,
-      GOOGLE_OAUTH_CLIENT_SECRET,
-    );
+
+    const clientId = config.get('auth.oauth.google.clientId');
+    const clientSecret = config.get('auth.oauth.google.clientSecret');
+    const cipherSecret = config.get('auth.cipher.secret');
+
+    if (!clientId) {
+      throw new InternalServerErrorException('Google client id not setup');
+    } else if (!clientSecret) {
+      throw new InternalServerErrorException('Google client secret not setup');
+    } else if (!cipherSecret) {
+      throw new InternalServerErrorException('Cipher secret not setup');
+    }
+
+    this.cipher = cipherSecret;
+    this.googleAuth = new google.auth.OAuth2(clientId, clientSecret);
   }
 
   async validateUser(loginDto: LoginDto) {
@@ -118,10 +126,7 @@ export class AuthService {
   }
 
   private encrypt(password: string): string {
-    if (!CIPHER_SECRET) {
-      throw new InternalServerErrorException('Missing environment variable');
-    }
-    const secretKey = Buffer.from(CIPHER_SECRET, 'utf-8').slice(0, 32);
+    const secretKey = Buffer.from(this.cipher, 'utf-8').slice(0, 32);
 
     const encryptedData = pbkdf2Sync(
       password,

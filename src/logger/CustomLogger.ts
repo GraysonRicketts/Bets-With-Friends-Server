@@ -1,6 +1,6 @@
 import { Injectable, Scope, ConsoleLogger } from '@nestjs/common';
 import winston, { createLogger, format, transports } from 'winston';
-import { isProd } from '../env/env.util';
+import { isProd } from '../config.util';
 import { ALS } from 'src/app/async.context';
 
 const levels = {

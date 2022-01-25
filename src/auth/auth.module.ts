@@ -5,9 +5,11 @@ import { LocalStrategy } from './strategy/local.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './controller/auth.controller';
 import { JwtModule } from '@nestjs/jwt';
-import { JWT_EXPIRATION, JWT_SECRET } from '../env/env.constants';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { isProd } from '../env/env.util';
+import config from 'config';
+
+const jwtSecret = config.get('auth.jwt.secret');
+const jwtExpiration = config.get('auth.jwt.expiration');
 
 @Module({
   controllers: [AuthController],
@@ -16,13 +18,9 @@ import { isProd } from '../env/env.util';
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async () => {
-        if (!JWT_EXPIRATION && !isProd()) {
-          return { secret: JWT_SECRET };
-        }
-
         return {
-          secret: JWT_SECRET,
-          signOptions: { expiresIn: JWT_EXPIRATION },
+          secret: jwtSecret,
+          signOptions: { expiresIn: jwtExpiration || '7d' },
         };
       },
     }),

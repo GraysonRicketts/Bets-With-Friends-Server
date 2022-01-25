@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { CustomLogger } from '../../../../logger/CustomLogger';
 import { PrismaService } from '../../../../prisma/prisma.service';
